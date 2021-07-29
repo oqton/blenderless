@@ -1,9 +1,9 @@
 name: Release
 
-on: ['push']
-  # push:
-  #   tags:
-  #     - '*.*.*'
+on:
+  push:
+    tags:
+      - '*.*.*'
 
 jobs:
   Release:
