@@ -56,7 +56,6 @@ jobs:
         uses: JRubics/poetry-publish@v1.6
         with:
           python_version: '3.7'
-          poetry_version: '==1.1.5'  # (PIP version specifier syntax)
+          poetry_version: '==1.1.5'
           pypi_token: ${{ secrets.PYPI_API_TOKEN }}
-          build_format: 'sdist'
           ignore_dev_requirements: "yes"

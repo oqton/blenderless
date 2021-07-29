@@ -122,9 +122,6 @@ python-versions = ">=3.7, <3.8"
 [package.dependencies]
 numpy = "*"
 
-[package.source]
-type = "url"
-url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl"
 [[package]]
 name = "cffi"
 version = "1.14.6"
@@ -1249,7 +1246,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.7"
-content-hash = "cdae1e673e786fe92e6afb40c523abbbf15aeb6b5cdbd83f5e9576d969099b90"
+content-hash = "a5ff7806686a72ef5ae0a49a3c988e93a8800fdc1f710d37dedc9b83e03a5ed3"
 
 [metadata.files]
 antlr4-python3-runtime = [
@@ -1311,7 +1308,10 @@ bleach = [
     {file = "bleach-3.3.1-py2.py3-none-any.whl", hash = "sha256:ae976d7174bba988c0b632def82fdc94235756edfb14e6558a9c5be555c9fb78"},
     {file = "bleach-3.3.1.tar.gz", hash = "sha256:306483a5a9795474160ad57fce3ddd1b50551e981eed8e15a582d34cef28aafa"},
 ]
-bpy = []
+bpy = [
+    {file = "bpy-2.91a0-cp37-cp37m-macosx_10_13_x86_64.whl", hash = "sha256:580e5317b6609c6a1c710c2a1f467423310e85c998ff065faf8cfbe64e46f560"},
+    {file = "bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:120a0394f6edd4703b610d7d963369513781db69bd4d2b126a36abf9c064594a"},
+]
 cffi = [
     {file = "cffi-1.14.6-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:22b9c3c320171c108e903d61a3723b51e37aaa8c81255b5e7ce102775bd01e2c"},
     {file = "cffi-1.14.6-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:f0c5d1acbfca6ebdd6b1e3eded8d261affb6ddcf2186205518f1428b8569bb99"},
