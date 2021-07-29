@@ -32,6 +32,11 @@ yapf = "*"
 pylint = "^2.5.3"
 notebook = "*"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+
 [build-system]
-requires = ["poetry>=1.1.2", "setuptools", "cython"]
+requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
 build-backend = "poetry.masonry.api"
