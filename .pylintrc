@@ -1,0 +1,34 @@
+[MESSAGES CONTROL]
+
+disable=all
+
+enable=C0413, # wrong-import-position
+       C0411, # wrong-import-order
+       C0301, # max-line-length
+       C0325, # superfluous-parens (unnecessary parentheses)
+       E0401, # import-error
+       R0913, # too-many-arguments
+       R1701, # consider-merging-isinstance
+       R1705, # no-else-return (unnecessary else after return)
+       W0511, # fixme (FIXME/TODO statements)
+       W0603, # global-statement (use of `global`)
+       W0611, # unused-import
+       W0612, # unused-variable
+       W0622, # redefined-builtin
+       W0703, # broad-except (Catching too general exception)
+       W1309, # f-string-without-interpolation
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[DESIGN]
+
+# Maximum number of arguments for function / method
+max-args=7
+
+[MISCELLANEOUS]
+
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME

@@ -1,0 +1,17 @@
+scene:
+  preset_path: ../../preset.blend
+
+
+cameras:
+  - _target_: blenderless.camera.SphericalCoordinateCamera
+    azimuth: 45
+    elevation: 30
+    theta: 0
+    distance: 1
+
+objects:
+  - _target_: blenderless.geometry.Mesh
+    mesh_path: ../../mesh/3DBenchy.stl
+    material:
+      _target_: blenderless.material.MaterialFromName
+      material_name: test_material

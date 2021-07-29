@@ -1,0 +1,35 @@
+[tool]
+
+[tool.poetry]
+name = "blenderless"
+version = "1.0.0"
+authors = []
+description = ""
+
+[tool.poetry.dependencies]
+python = "~3.7"
+pillow = "*"
+bpy = [
+    { url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl", platform = "linux" },
+    { url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-macosx_10_13_x86_64.whl", platform = "darwin"}
+]
+trimesh = "^3.9.24"
+hydra-core = "^1.0.7"
+imageio = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytype = "*"
+pytest-cov = "*"
+coverage = "*"
+numpy = "*"
+Pillow= "*"
+scikit-image = "^0.18.0"
+pre-commit = "*"
+yapf = "*"
+pylint = "^2.5.3"
+notebook = "*"
+
+[build-system]
+requires = ["poetry>=1.1.2", "setuptools", "cython"]
+build-backend = "poetry.masonry.api"

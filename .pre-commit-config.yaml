@@ -1,0 +1,30 @@
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+  python: python3.7
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-json
+      - id: pretty-format-json
+        args: [--autofix]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/myint/autoflake.git
+    rev: v1.4
+    hooks:
+      - id: autoflake # removes unused imports
+        args: [--remove-all-unused-imports, --ignore-init-module-imports, -i]
+  - repo: https://github.com/Irvenae/pre-commit-yapf-isort
+    rev: 'c18a981'
+    hooks:
+      - id: yapf-isort

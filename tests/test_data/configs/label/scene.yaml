@@ -1,0 +1,13 @@
+scene:
+  preset_path: ../../preset.blend
+
+cameras:
+  - _target_: blenderless.camera.SphericalCoordinateCamera
+    azimuth: 0
+    elevation: 90
+    theta: -90
+    distance: 1
+
+objects:
+  - _target_: blenderless.geometry.BlenderLabel
+    label_value: '42'
