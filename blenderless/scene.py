@@ -42,10 +42,14 @@ class Scene():
         self.root_dir = root_dir
 
     @classmethod
-    def from_config(cls, config_path):
+    def from_config(cls, config_path, root_dir=None):
         config = OmegaConf.load(config_path)
 
-        scene = hydra.utils.instantiate(config.scene, _target_=cls, root_dir=pathlib.Path(config_path).parent)
+        if root_dir is None:
+            root_dir = pathlib.Path(config_path).parent
+        else:
+            root_dir = pathlib.Path(root_dir)
+        scene = hydra.utils.instantiate(config.scene, _target_=cls, root_dir=root_dir)
 
         # load cameras
         for camera in config.cameras:

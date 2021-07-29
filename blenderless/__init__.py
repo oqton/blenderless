@@ -12,10 +12,10 @@ def render(mesh_path, dest_path=None, file_name=None, azimuth=45, elevation=30, 
     if dest_path is None:
         dest_path = tempfile.gettempdir()
     if file_name is None:
-        file_name = f'/{uuid.uuid4().int}.png'
+        file_name = f'{uuid.uuid4().int}.png'
 
     scene = Scene(**kwargs)
     scene.add_object(Mesh(mesh_path=mesh_path))
     scene.add_object(SphericalCoordinateCamera(azimuth=azimuth, elevation=elevation, theta=theta))
-    render_paths = scene.render(dest_path)
+    render_paths = scene.render(dest_path, file_name)
     return render_paths[0]

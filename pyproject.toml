@@ -23,6 +23,8 @@ trimesh = "^3.9.24"
 hydra-core = "^1.0.7"
 imageio = "*"
 xvfbwrapper = "^0.2.9"
+click = "^8.0.1"
+tqdm = "^4.61.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -36,6 +38,9 @@ pre-commit = "*"
 yapf = "*"
 pylint = "^2.5.3"
 notebook = "*"
+
+[tool.poetry.scripts]
+blenderless = 'blenderless.cli:cli'
 
 [tool.poetry-dynamic-versioning]
 enable = true

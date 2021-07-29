@@ -10,7 +10,7 @@ def load_default_materials(bpy):
 
 
 def load_materials(bpy, filepath):
-    with bpy.data.libraries.load(str(filepath)) as (data_from, data_to):
+    with bpy.data.libraries.load(str(filepath.absolute())) as (data_from, data_to):
         data_to.materials = data_from.materials
 
 

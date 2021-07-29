@@ -1,0 +1,16 @@
+{
+  "editor.formatOnSave": true,
+  "python.formatting.provider": "yapf",
+  "python.formatting.yapfArgs": [
+    "--style",
+    "${workspaceFolder}/.style.yapf"
+  ],
+  "python.linting.enabled": true,
+  "python.linting.pylintArgs": [
+    "--rcfile",
+    "${workspaceFolder}/.pylintrc"
+  ],
+  "python.linting.pylintEnabled": true,
+  "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+  "python.testing.pytestEnabled": true
+}
