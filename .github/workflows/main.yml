@@ -1,4 +1,4 @@
-name: TEST
+name: Test
 
 # Controls when the workflow will run
 on: [push, pull_request]
