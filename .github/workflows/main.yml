@@ -27,6 +27,6 @@ jobs:
       - name: Build envirnoment
         run: make .venv
       - name: Run tests
-        uses: run-with-xvfb
+        uses: GabrielBB/xvfb-action@v1
         with:
           run: make test
