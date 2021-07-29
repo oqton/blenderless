@@ -3,8 +3,17 @@
 [tool.poetry]
 name = "blenderless"
 version = "0.0.0"
-authors = []
-description = ""
+authors = [
+    "Axel Vlaminck <axel.vlaminck@oqton.com>",
+    "Ruben Verhack <ruben.verhack@oqton.com>"
+]
+description = "Blenderless is the python package for easy headless rendering using blender."
+license = "GPL-3.0-or-later"
+readme = "README.md"
+homepage = "https://github.com/oqton/blenderless"
+repository = "https://github.com/oqton/blenderless"
+documentation = "https://github.com/oqton/blenderless"
+keywords = ["rendering", "blender", "headless", "3D"]
 
 [tool.poetry.dependencies]
 python = "~3.7"
