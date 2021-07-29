@@ -1,0 +1,22 @@
+name: Code Quality
+
+on: [push, pull_request]
+
+jobs:
+  pre-commit:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: pip install yapf isort
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v2.0.0

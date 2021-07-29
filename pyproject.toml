@@ -2,18 +2,23 @@
 
 [tool.poetry]
 name = "blenderless"
-version = "1.0.0"
-authors = []
-description = ""
+version = "0.0.0"
+authors = [
+    "Axel Vlaminck <axel.vlaminck@oqton.com>",
+    "Ruben Verhack <ruben.verhack@oqton.com>"
+]
+description = "Blenderless is the python package for easy headless rendering using blender."
+license = "GPL-3.0-or-later"
+readme = "README.md"
+homepage = "https://github.com/oqton/blenderless"
+repository = "https://github.com/oqton/blenderless"
+documentation = "https://github.com/oqton/blenderless"
+keywords = ["rendering", "blender", "headless", "3D"]
 
 [tool.poetry.dependencies]
 python = "~3.7"
 pillow = "*"
-bpy = [
-    { url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl", platform = "linux" },
-    { url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-macosx_10_13_x86_64.whl", platform = "darwin"},
-    { url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-win_amd64.whl", platform = "win32"},
-]
+bpy = "==2.91a0"
 trimesh = "^3.9.24"
 hydra-core = "^1.0.7"
 imageio = "*"
@@ -32,6 +37,11 @@ yapf = "*"
 pylint = "^2.5.3"
 notebook = "*"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
+
 [build-system]
-requires = ["poetry>=1.1.2", "setuptools", "cython"]
+requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
 build-backend = "poetry.masonry.api"
