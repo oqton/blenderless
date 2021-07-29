@@ -13,7 +13,7 @@ jobs:
       matrix:
         python-version: [3.7]
         poetry-version: [1.1.5]
-        os: [ubuntu-18.04, macos-latest]
+        os: [ubuntu-18.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -27,6 +27,4 @@ jobs:
       - name: Build envirnoment
         run: make .venv
       - name: Run tests
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: make test
+        run: make test
