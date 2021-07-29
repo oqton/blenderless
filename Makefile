@@ -7,11 +7,7 @@ POETRY_VIRTUALENVS_IN_PROJECT=true
 
 .PHONY: test
 test: $(VENV_NAME)
-ifdef DISPLAY
 	poetry run pytest tests/ -vv --cov=blenderless --cov-report=html --cov-report term:skip-covered
-else
-	xvfb-run poetry run pytest tests/ -vv --cov=blenderless --cov-report=html --cov-report term:skip-covered
-endif
 
 $(VENV_NAME): | poetry.lock
 	poetry install -vvv
