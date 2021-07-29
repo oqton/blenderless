@@ -15,5 +15,8 @@ jobs:
         with:
           python-version: 3.7
 
+      - name: Install dependencies
+        run: pip install yapf isort
+
       - name: Run pre-commit
         uses: pre-commit/action@v2.0.0
