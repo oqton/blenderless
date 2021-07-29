@@ -63,16 +63,17 @@ class Scene():
 
     def render_gif(self, filepath, duration=2, **kwargs):
         with tempfile.TemporaryDirectory() as tmpdirname:
-            render_filepaths = self.render(filepath=tmpdirname, **kwargs)
+            render_path = pathlib.Path(tmpdirname) / 'out.png'
+            render_filepaths = self.render(render_path, **kwargs)
             images = []
             for filename in render_filepaths:
                 images.append(imageio.imread(filename))
         imageio.mimsave(filepath, images, format='GIF', duration=duration / len(images))
         return filepath
 
-    def render(self, filepath='.', filename='render.png', export_blend_path=None):
+    def render(self, filepath, export_blend_path=None):
         filepath_queue = Queue()
-        p = Process(target=self._render, args=(self, filepath, filename, export_blend_path, filepath_queue))
+        p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue))
         p.start()
         p.join()
         filepath_list = []
@@ -81,7 +82,7 @@ class Scene():
         return filepath_list
 
     @staticmethod
-    def _render(self, filepath, filename, export_blend_path, filepath_queue):
+    def _render(self, filepath, export_blend_path, filepath_queue):
         with Xvfb() as xvfb:
             filepath = pathlib.Path(filepath)
             bpy = import_bpy()
@@ -118,10 +119,10 @@ class Scene():
             # render for all cameras
             cameras = self.cameras(blender_scene)
             for n, camera in enumerate(cameras):
-                if len(cameras) == 1:
-                    render_file = filepath / filename
+                if len(cameras) != 1:
+                    render_file = filepath.parent / f'{n:03d}_{filepath.name}'
                 else:
-                    render_file = filepath / f'{n:03d}_{filename}'
+                    render_file = filepath
 
                 filepath_queue.put(render_file)
                 blender_scene.render.filepath = str(render_file)

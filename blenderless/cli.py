@@ -22,13 +22,26 @@ def cli(verbose):
 @cli.command()
 @click.argument("file_path", required=True, type=str)
 @click.argument("root", default=".", required=False, type=str)
-def file(file_path, root):
-    """Render geometries that match file glob"""
+def image(file_path, root):
+    """Render geometries to image"""
     geometry_files = list(pathlib.Path(root).glob(file_path))
     l.info(f'found {len(geometry_files)} geometry files')
     for geometry_file in tqdm(geometry_files):
         l.debug(f'render: {geometry_file}')
-        blenderless.render(geometry_file, geometry_file.parent, f'{geometry_file.stem}.png')
+        blenderless.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
+        l.debug(f'render successful')
+
+
+@cli.command()
+@click.argument("file_path", required=True, type=str)
+@click.argument("root", default=".", required=False, type=str)
+def gif(file_path, root):
+    """Render geometries to gif"""
+    geometry_files = list(pathlib.Path(root).glob(file_path))
+    l.info(f'found {len(geometry_files)} geometry files')
+    for geometry_file in tqdm(geometry_files):
+        l.debug(f'render: {geometry_file}')
+        blenderless.gif(geometry_file, geometry_file.parent / f'{geometry_file.stem}.gif')
         l.debug(f'render successful')
 
 
