@@ -27,4 +27,6 @@ jobs:
       - name: Build envirnoment
         run: make .venv
       - name: Run tests
-        run: make test
+        uses: run-with-xvfb
+        with:
+          run: make test
