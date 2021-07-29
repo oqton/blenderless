@@ -10,7 +10,7 @@ def test_file_rendering(tmp_path, mesh_paths):
     runner = CliRunner()
 
     copyfile(mesh_path, tmp_path / mesh_path.name)
-    result = runner.invoke(blenderless.cli.file, [mesh_path.name, str(tmp_path)])
+    result = runner.invoke(blenderless.cli.image, [mesh_path.name, str(tmp_path)])
     assert result.exit_code == 0
     assert (tmp_path / f'{mesh_path.stem}.png').exists()
 

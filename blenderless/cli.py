@@ -51,5 +51,5 @@ def gif(file_path, root):
 def config(config_path, output_file):
     """Render config file"""
     scene = blenderless.Scene.from_config(config_path)
-    scene.render(filename=output_file)
+    scene.render(output_file)
     l.debug(f'render successful')
