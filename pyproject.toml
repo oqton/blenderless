@@ -17,6 +17,7 @@ bpy = [
 trimesh = "^3.9.24"
 hydra-core = "^1.0.7"
 imageio = "*"
+xvfbwrapper = "^0.2.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

@@ -125,6 +125,7 @@ numpy = "*"
 [package.source]
 type = "url"
 url = "https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl"
+
 [[package]]
 name = "cffi"
 version = "1.14.6"
@@ -1219,6 +1220,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "xvfbwrapper"
+version = "0.2.9"
+description = "run headless display inside X virtual framebuffer (Xvfb)"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "yapf"
 version = "0.31.0"
 description = "A formatter for Python code."
@@ -1241,7 +1250,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.7"
-content-hash = "130380e3fc9b5bdcca08496420587efd4d6ea1a06faee93c799ff8f00c7f1e0d"
+content-hash = "cdae1e673e786fe92e6afb40c523abbbf15aeb6b5cdbd83f5e9576d969099b90"
 
 [metadata.files]
 antlr4-python3-runtime = [
@@ -2200,6 +2209,9 @@ webencodings = [
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
+]
+xvfbwrapper = [
+    {file = "xvfbwrapper-0.2.9.tar.gz", hash = "sha256:bcf4ae571941b40254faf7a73432dfc119ad21ce688f1fdec533067037ecfc24"},
 ]
 yapf = [
     {file = "yapf-0.31.0-py2.py3-none-any.whl", hash = "sha256:e3a234ba8455fe201eaa649cdac872d590089a18b661e39bbac7020978dd9c2e"},
