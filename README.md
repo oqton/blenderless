@@ -2,8 +2,9 @@
 
 Blenderless is the python package for easy headless rendering using blender.
 
+## How to use this
 
-## Getting Started
+### Python module
 
 Create image from mesh:
 
@@ -12,16 +13,35 @@ import blenderless
 path_to_foo_png = blenderless.render('foo.stl')
 ```
 
-### Installing
+### CLI
 
-Install blenderless
+render geometry to image
+
+```sh
+blenderless image foo.stl
+```
+
+render geometry to gif
+
+```sh
+blenderless gif foo.stl
+```
+
+render config to image
+
+```sh
+blenderless config scene.yml
+```
+
+## Install
+
 ```buildoutcfg
 sudo apt-get install xvfb pipx
 pipx install poetry==1.1.5
 make .venv
 ```
 
-### Running the tests
+### Testing
 
 ```sh
 make test

@@ -49,7 +49,7 @@ def gif(file_path, root):
 @click.argument("config_path", required=True, type=click.Path(exists=True))
 @click.argument("output_file", default="render.png", required=False, type=str)
 def config(config_path, output_file):
-    """Render config file"""
+    """Render scene from config file"""
     scene = blenderless.Scene.from_config(config_path)
     scene.render(output_file)
     l.debug(f'render successful')
