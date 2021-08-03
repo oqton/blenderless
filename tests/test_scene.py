@@ -10,9 +10,8 @@ def test_create_new_scene():
 
 def test_render_empty_scene(tmp_path):
     scene = Scene()
-    render_filename = 'out.png'
-    render_path = tmp_path / render_filename
-    scene.render(tmp_path, render_filename)
+    render_path = tmp_path / 'out.png'
+    scene.render(render_path)
     assert render_path.exists()
 
 
@@ -23,8 +22,7 @@ def test_render_multiple_cameras(tmp_path):
     for _ in range(num_cameras):
         scene.add_object(BlenderCamera())
 
-    render_filename = 'out.png'
-    render_filepaths = scene.render(tmp_path, render_filename)
+    render_filepaths = scene.render(tmp_path / 'out.png')
 
     for path in render_filepaths:
         assert path.exists()
@@ -38,9 +36,8 @@ def test_set_get_resolution(tmp_path):
 
     assert scene.resolution == (x, y)
 
-    render_filename = 'out.png'
-    render_path = tmp_path / render_filename
-    scene.render(tmp_path, render_filename)
+    render_path = tmp_path / 'out.png'
+    scene.render(render_path)
     assert render_path.exists()
     im = Image.open(render_path)
     width, height = im.size

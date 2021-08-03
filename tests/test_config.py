@@ -15,12 +15,11 @@ def examples():
 @pytest.mark.parametrize("example_path", examples())
 def test_load_scene_from_config(example_path):
 
-    test_output_filename = 'test_output.png'
     test_output_filepath = example_path / 'test_output.png'
     blend_scene_filepath = example_path / 'scene.blend'
 
     scene = Scene.from_config(example_path / 'scene.yaml')
-    render_paths = scene.render(example_path, test_output_filename, export_blend_path=blend_scene_filepath)
+    render_paths = scene.render(test_output_filepath, export_blend_path=blend_scene_filepath)
     assert test_output_filepath.exists()
     assert render_paths[0] == test_output_filepath
 
