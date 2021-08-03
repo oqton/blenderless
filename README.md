@@ -1,6 +1,6 @@
 # Blenderless
 
-Blenderless is the python package for easy headless rendering using blender.
+Blenderless is the Python package for easy headless rendering using Blender.
 
 
 ## Getting Started
