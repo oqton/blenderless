@@ -1,26 +1,25 @@
 import logging
 
+from IPython.display import Image, display
+
 logger = logging.getLogger()
 
 
 def notebook_preview(f):
+    """Function decorator in order to preview an image in a IPython context."""
 
     def preview_wrapper(*args, **kwargs):
         path = f(*args, **kwargs)
         if in_ipynb():
-            import matplotlib.image as mpimg
-            import matplotlib.pyplot as plt
-            img = mpimg.imread(str(path))
-            plt.imshow(img)
-            plt.axis('off')
+            display(Image(str(path)))
         return path
 
     return preview_wrapper
 
 
 def in_ipynb():
+    """Determine if the code is run within an IPython context."""
     try:
-        cfg = get_ipython().config
-        return 'jupyter' in cfg['IPKernelApp']['connection_file'].lower()
+        return get_ipython().__class__.__name__ == 'ZMQInteractiveShell'
     except NameError:
         return False

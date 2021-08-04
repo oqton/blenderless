@@ -13,12 +13,18 @@ from blenderless.material import load_materials
 
 
 def import_bpy():
+    """Import blenderpy.
+
+    The reason for this late-loading is that communication with Blender is
+    restricted to a single separate render thread.
+    """
     import bpy
     return bpy
 
 
 class Scene():
 
+    #pylint: disable=too-many-arguments
     def __init__(self,
                  render_engine='BLENDER_WORKBENCH',
                  transparant=True,
@@ -73,6 +79,8 @@ class Scene():
 
     def render(self, filepath, export_blend_path=None):
         filepath_queue = Queue()
+        if isinstance(filepath, str):
+            filepath = pathlib.PosixPath(filepath)
         p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue))
         p.start()
         p.join()
@@ -83,7 +91,7 @@ class Scene():
 
     @staticmethod
     def _render(self, filepath, export_blend_path, filepath_queue):
-        with Xvfb() as xvfb:
+        with Xvfb():
             filepath = pathlib.Path(filepath)
             bpy = import_bpy()
             bpy.ops.scene.new(type='EMPTY')

@@ -1,8 +1,10 @@
+import pathlib
 import tempfile
 import uuid
 
 from blenderless.camera import *
 from blenderless.geometry import *
+from blenderless.material import *
 from blenderless.scene import *
 from blenderless.utils import notebook_preview
 
@@ -10,7 +12,7 @@ from blenderless.utils import notebook_preview
 @notebook_preview
 def render(mesh_path, dest_path=None, azimuth=45, elevation=30, theta=0, **kwargs):
     if dest_path is None:
-        dest_path = tempfile.gettempdir() / f'{uuid.uuid4().int}.png'
+        dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
 
     scene = Scene(**kwargs)
     scene.add_object(Mesh(mesh_path=mesh_path))
@@ -22,7 +24,7 @@ def render(mesh_path, dest_path=None, azimuth=45, elevation=30, theta=0, **kwarg
 @notebook_preview
 def gif(mesh_path, dest_path=None, elevation=30, theta=0, frames=60, duration=2, **kwargs):
     if dest_path is None:
-        dest_path = tempfile.gettempdir() / f'{uuid.uuid4().int}.gif'
+        dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.gif'
 
     scene = Scene(**kwargs)
     scene.add_object(Mesh(mesh_path=mesh_path))
