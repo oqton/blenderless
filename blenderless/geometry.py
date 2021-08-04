@@ -84,7 +84,7 @@ class PointCloud(Geometry):
 
             points = trimesh.transformations.transform_points(self.points, self.transformation)
 
-            # Convert to octahedrons and repeat corresponding labels 6 times.
+            # Convert to octahedrons and repeat corresponding labels 8 times.
             verts, faces = self._convert_points_to_octahedrons(points, self.point_size)
             if self.labels is not None:
                 self.labels = np.repeat(self.labels, 8, axis=0)
