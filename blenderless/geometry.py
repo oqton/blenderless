@@ -10,11 +10,11 @@ from blenderless.material import Material, MaterialFromName, MaterialRGBA, add_m
 
 @dataclass
 class Geometry(BlenderObject):
-    """Geometry Blender Object
+    """Geometry Blender Object.
 
     This class allows a material to be added to the object.
     """
-    material: Material = MaterialFromName(name='Material')
+    material: Material = MaterialFromName(material_name='Material')
     material_list: List[Material] = None
     colormap: np.ndarray = None
     meta: dict = field(default_factory=dict)
@@ -64,7 +64,7 @@ class Mesh(Geometry):
 
 @dataclass
 class PointCloud(Geometry):
-    """PointCloud representation
+    """PointCloud representation.
 
     Point cloud support is currently flakey in blender. Therefore, point clouds are converted into a mesh object
     by placing an octahedron around each point (6 faces, 8 points).
@@ -116,7 +116,7 @@ class BlenderLabel(Geometry):
     label_value: str = ''
     size: float = 1.0
     outline_size: float = 0.0
-    outline_material: Material = MaterialFromName(name='Material')
+    outline_material: Material = MaterialFromName(material_name='Material')
 
     def blender_objects(self, bpy):
         objects = []

@@ -6,8 +6,8 @@ from blenderless.material import MaterialFromName, MaterialRGBA
 
 def test_create_material_from_name():
     material_name = 'Material'
-    material = MaterialFromName(name=material_name)
-    assert material.name == material_name
+    material = MaterialFromName(material_name=material_name)
+    assert material.material_name == material_name
 
 
 def test_create_material_rgba():
@@ -24,7 +24,7 @@ def test_material_from_colormap():
     for i, rgbamat in enumerate(matlist):
         assert isinstance(rgbamat, MaterialRGBA)
         npt.assert_allclose(rgbamat.rgba[:3], colormap[i, :])
-        assert rgbamat.name == f'label{i}'
+        assert rgbamat.material_name == f'label{i}'
 
     # With alphas
     colormap = np.array([[128, 0, 0, 255], [0, 128, 0, 128]])

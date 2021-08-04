@@ -23,7 +23,7 @@ def load_materials(bpy, filepath):
 @dataclass
 class Material:
     """Material base class."""
-    name: str = ''
+    material_name: str = ''
     _blender_material = None
 
 
@@ -34,7 +34,7 @@ class MaterialRGBA(Material):
 
     def blender_material(self, bpy):
         if self._blender_material is None:
-            self._blender_material = bpy.data.materials.new(name=self.name)
+            self._blender_material = bpy.data.materials.new(name=self.material_name)
             self._blender_material.diffuse_color = self.rgba
         return self._blender_material
 
@@ -51,7 +51,7 @@ class MaterialRGBA(Material):
 
         materials = [None] * n
         for i in range(n):
-            materials[i] = MaterialRGBA(rgba=tuple(colormap[i, :]), name=f'label{i}')
+            materials[i] = MaterialRGBA(rgba=tuple(colormap[i, :]), material_name=f'label{i}')
         return materials
 
 
@@ -65,7 +65,7 @@ class MaterialFromName(Material):
 
     def blender_material(self, bpy):
         if self._blender_material is None:
-            self._blender_material = bpy.data.materials[self.name]
+            self._blender_material = bpy.data.materials[self.material_name]
         return self._blender_material
 
 
