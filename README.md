@@ -36,7 +36,7 @@ blenderless config scene.yml
 ## Install
 
 ```buildoutcfg
-sudo apt-get install xvfb pipx
+sudo apt-get install xvfb
 pipx install poetry==1.1.5
 make .venv
 ```
