@@ -78,6 +78,7 @@ class Scene():
         return filepath
 
     def render(self, filepath, export_blend_path=None):
+        """Start render in separate process in which bpy is imported."""
         filepath_queue = Queue()
         if isinstance(filepath, str):
             filepath = pathlib.PosixPath(filepath)
@@ -152,7 +153,7 @@ class Scene():
 
     @staticmethod
     def _zoom_to_all(bpy):
-        # zoom to view all objects
+        """Zoom to view all objects."""
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
             if obj.type == 'MESH' or obj.type == 'FONT':

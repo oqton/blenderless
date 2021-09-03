@@ -5,7 +5,7 @@ import pytest
 from PIL import Image
 from skimage.metrics import structural_similarity
 
-from blenderless import Scene
+from blenderless.scene import Scene
 
 
 def examples():
