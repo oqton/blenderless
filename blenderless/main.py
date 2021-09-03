@@ -9,7 +9,7 @@ from blenderless.scene import Scene
 from blenderless.utils import notebook_preview
 
 
-class Orchestrator():
+class Blenderless():
     """Class to run render pipelines."""
 
     export_blend_path: Optional[str] = None
@@ -30,15 +30,23 @@ class Orchestrator():
 
     @classmethod
     @notebook_preview
-    def render_from_config(cls, config_path, output_file):
+    def render_from_config(cls, config_path, dest_path=None):
+        """Render from config file."""
+        if dest_path is None:
+            dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
+
         scene = Scene.from_config(config_path)
-        render_paths = scene.render(output_file, export_blend_path=cls.export_blend_path)
+        render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path)
         return render_paths[0]
 
     @classmethod
     @notebook_preview
     def gif(cls, mesh_path, dest_path=None, elevation=30, theta=0, frames=60, duration=2, **kwargs):
-        """Render a sequence of frames and export as GIF."""
+        """Render a sequence of frames and export as GIF.
+
+        The renderer will make one full loop around the object. The azimuth angles are thus
+        dependent on the number of frames.
+        """
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.gif'
 

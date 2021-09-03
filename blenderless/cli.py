@@ -4,7 +4,7 @@ import pathlib
 import click
 from tqdm import tqdm
 
-from blenderless import Orchestrator
+from blenderless import Blenderless
 
 l = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def cli(verbose, export_blend_path):
     logging.addLevelName(logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
     logging.addLevelName(logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-    Orchestrator.export_blend_path = export_blend_path
+    Blenderless.export_blend_path = export_blend_path
     if export_blend_path:
         logging.info(f'Generated .blend file will be exported to: {export_blend_path}')
 
@@ -33,7 +33,7 @@ def image(file_path, root):
     l.info(f'found {len(geometry_files)} geometry files')
     for geometry_file in tqdm(geometry_files):
         l.debug(f'render: {geometry_file}')
-        Orchestrator.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
+        Blenderless.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
         l.debug(f'render successful')
 
 
@@ -46,7 +46,7 @@ def gif(file_path, root):
     l.info(f'found {len(geometry_files)} geometry files')
     for geometry_file in tqdm(geometry_files):
         l.debug(f'render: {geometry_file}')
-        Orchestrator.gif(geometry_file, geometry_file.parent / f'{geometry_file.stem}.gif')
+        Blenderless.gif(geometry_file, geometry_file.parent / f'{geometry_file.stem}.gif')
         l.debug(f'render successful')
 
 
@@ -55,5 +55,5 @@ def gif(file_path, root):
 @click.argument("output_file", default="render.png", required=False, type=str)
 def config(config_path, output_file):
     """Render scene from config file"""
-    Orchestrator.render_from_config(config_path, output_file)
+    Blenderless.render_from_config(config_path, output_file)
     l.debug(f'render successful')

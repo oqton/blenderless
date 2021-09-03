@@ -1,1 +1,1 @@
-from blenderless.orchestrator import Orchestrator
+from blenderless.main import Blenderless
