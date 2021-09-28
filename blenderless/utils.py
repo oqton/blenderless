@@ -1,6 +1,10 @@
 import logging
 
-from IPython.display import Image, display
+# Load IPython only if available
+try:
+    from IPython.display import Image, display
+except:
+    pass
 
 logger = logging.getLogger()
 

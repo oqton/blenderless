@@ -21,3 +21,18 @@ def test_config_rendering(example_config_path, tmp_path):
     result = runner.invoke(blenderless.cli.config, [str(example_config_path), str(output_file)])
     assert result.exit_code == 0
     assert output_file.exists()
+
+
+def test_export_blender_path(example_config_path, tmp_path):
+    runner = CliRunner()
+    output_file = tmp_path / 'render.png'
+    blender_file = tmp_path / 'render.blend'
+    result = runner.invoke(
+        blenderless.cli.cli,
+        ['--export-blend-path',
+         str(blender_file), 'config',
+         str(example_config_path),
+         str(output_file)])
+    assert result.exit_code == 0
+    assert output_file.exists()
+    assert blender_file.exists()
