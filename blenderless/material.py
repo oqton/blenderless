@@ -71,4 +71,5 @@ class MaterialFromName(Material):
 
 def add_material(blender_object, blender_material):
     """Add material to blender object."""
+    blender_object.data.materials.clear()
     blender_object.data.materials.append(blender_material)

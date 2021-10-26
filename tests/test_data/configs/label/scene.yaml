@@ -11,3 +11,18 @@ cameras:
 objects:
   - _target_: blenderless.geometry.BlenderLabel
     label_value: '42'
+    outline_size: 0.01
+    material:
+      _target_: blenderless.material.MaterialRGBA
+      rgba:
+        - 0
+        - 0
+        - 2
+        - 255
+    outline_material:
+      _target_: blenderless.material.MaterialRGBA
+      rgba:
+        - 2
+        - 0
+        - 0
+        - 255
