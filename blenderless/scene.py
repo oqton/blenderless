@@ -1,3 +1,4 @@
+import os
 import pathlib
 import tempfile
 from multiprocessing import Process, Queue
@@ -18,6 +19,8 @@ def import_bpy():
     The reason for this late-loading is that communication with Blender is
     restricted to a single separate render thread.
     """
+    os.environ["BLENDER_SYSTEM_SCRIPTS"] = 'external/blenderpy/bpy-2.91a0.data/scripts/2.91/scripts'
+    os.environ["BLENDER_SYSTEM_DATAFILES"] = 'external/blenderpy/bpy-2.91a0.data/scripts/2.91/datafiles'
     import bpy
     return bpy
 
