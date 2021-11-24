@@ -1,0 +1,13 @@
+numpy
+click
+tqdm
+trimesh
+hydra-core
+imageio
+omegaconf
+xvfbwrapper
+setuptools
+importlib_metadata
+pillow
+typing_extensions
+zipp

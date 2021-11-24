@@ -12,7 +12,7 @@ l = logging.getLogger(__name__)
 @click.group()
 @click.option('--verbose/--no-verbose', '-v', default=False, help="Verbose output")
 @click.option('--export-blend-path', '-b', default=None, help="Path to export the generated .blend file to")
-def cli(verbose, export_blend_path):
+def main(verbose, export_blend_path):
     """Rendering geometries from the cli using blender"""
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format='%(processName)s %(message)s')
@@ -24,7 +24,7 @@ def cli(verbose, export_blend_path):
         logging.info(f'Generated .blend file will be exported to: {export_blend_path}')
 
 
-@cli.command()
+@main.command()
 @click.argument("file_path", required=True, type=str)
 @click.argument("root", default=".", required=False, type=str)
 def image(file_path, root):
@@ -34,10 +34,11 @@ def image(file_path, root):
     for geometry_file in tqdm(geometry_files):
         l.debug(f'render: {geometry_file}')
         Blenderless.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
+        l.info((geometry_file.parent / f'{geometry_file.stem}.png').absolute())
         l.debug(f'render successful')
 
 
-@cli.command()
+@main.command()
 @click.argument("file_path", required=True, type=str)
 @click.argument("root", default=".", required=False, type=str)
 def gif(file_path, root):
@@ -50,10 +51,15 @@ def gif(file_path, root):
         l.debug(f'render successful')
 
 
-@cli.command()
+@main.command()
 @click.argument("config_path", required=True, type=click.Path(exists=True))
 @click.argument("output_file", default="render.png", required=False, type=str)
 def config(config_path, output_file):
     """Render scene from config file"""
     Blenderless.render_from_config(config_path, output_file)
+    l.info(pathlib.Path(output_file).absolute())
     l.debug(f'render successful')
+
+
+if __name__ == '__main__':
+    main()

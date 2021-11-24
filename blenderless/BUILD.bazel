@@ -1,0 +1,56 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_runtime")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+py_library(
+    name = "blenderless_lib",
+    srcs = [
+        "__init__.py",
+        "blender_object.py",
+        "camera.py",
+        "geometry.py",
+        "main.py",
+        "material.py",
+        "scene.py",
+        "utils.py",
+    ],
+    imports = ["."],
+    deps = [
+        "@blenderpy",
+        requirement("numpy"),
+        requirement("tqdm"),
+        requirement("trimesh"),
+        requirement("hydra-core"),
+        requirement("imageio"),
+        requirement("xvfbwrapper"),
+        requirement("omegaconf"),
+        requirement("pillow"),
+    ],
+)
+
+py_runtime(
+    name = "blenderless_runtime",
+    files = [],
+    interpreter = ".venv/bin/python",
+    python_version = "PY3",
+)
+
+py_binary(
+    name = "blenderless",
+    srcs = [
+        "cli.py",
+    ],
+    data = glob(["test_data/**/*"]),
+    main = "cli.py",
+    srcs_version = "PY3",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":blenderless_lib",
+        requirement("click"),
+    ],
+)
+
+filegroup(
+    name = "blenderless_zip",
+    srcs = [":blenderless"],
+    output_group = "python_zip_file",
+)
