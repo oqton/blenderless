@@ -28,7 +28,7 @@ def test_export_blender_path(example_config_path, tmp_path):
     output_file = tmp_path / 'render.png'
     blender_file = tmp_path / 'render.blend'
     result = runner.invoke(
-        blenderless.cli.cli,
+        blenderless.cli.main,
         ['--export-blend-path',
          str(blender_file), 'config',
          str(example_config_path),
