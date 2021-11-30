@@ -85,6 +85,9 @@ class Scene():
         filepath_queue = Queue()
         exception_queue = Queue()
 
+        if 'DISPLAY' in os.environ and ':' not in os.environ['DISPLAY']:
+            del os.environ['DISPLAY']  # Workaround xfvb-wrapper bug
+
         if isinstance(filepath, str):
             filepath = pathlib.PosixPath(filepath)
         p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue, exception_queue))
@@ -92,7 +95,7 @@ class Scene():
         p.join()
 
         while not exception_queue.empty():
-            raise exception_queue.get()
+            raise RuntimeError from exception_queue.get()
 
         filepath_list = []
         while not filepath_queue.empty():

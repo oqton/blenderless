@@ -1,4 +1,5 @@
 from PIL import Image
+from xvfbwrapper import Xvfb
 
 from blenderless.camera import BlenderCamera
 from blenderless.scene import Scene
@@ -27,6 +28,11 @@ def test_render_multiple_cameras(tmp_path):
     for path in render_filepaths:
         assert path.exists()
     assert len(render_filepaths) == num_cameras
+
+
+def test_xvfb():
+    with Xvfb():
+        print('Runs within a virtual frame buffer.')
 
 
 def test_set_get_resolution(tmp_path):
