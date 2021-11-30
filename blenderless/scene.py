@@ -116,9 +116,6 @@ class Scene():
                 if self.preset_path:
                     load_materials(bpy, self.root_dir / self.preset_path)
 
-                if len(self._objects) == 0:
-                    raise RuntimeError('No blender objects to be rendered.')
-
                 for obj in self._objects:
                     obj.root_dir = self.root_dir
                     blender_scene.collection.children.link(obj.blender_collection(bpy))
