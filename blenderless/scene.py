@@ -83,69 +83,91 @@ class Scene():
     def render(self, filepath, export_blend_path=None):
         """Start render in separate process in which bpy is imported."""
         filepath_queue = Queue()
+        exception_queue = Queue()
+
+        if 'DISPLAY' in os.environ and ':' not in os.environ['DISPLAY']:
+            del os.environ['DISPLAY']  # Workaround xfvb-wrapper bug
+
         if isinstance(filepath, str):
             filepath = pathlib.PosixPath(filepath)
-        p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue))
+        p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue, exception_queue))
         p.start()
         p.join()
+
+        while not exception_queue.empty():
+            raise RuntimeError from exception_queue.get()
+
         filepath_list = []
         while not filepath_queue.empty():
             filepath_list.append(filepath_queue.get())
+
+        if len(filepath_list) == 0:
+            raise RuntimeError('Render process did not push any image files.')
+
         return filepath_list
 
     @staticmethod
-    def _render(self, filepath, export_blend_path, filepath_queue):
-        with Xvfb():
-            filepath = pathlib.Path(filepath)
-            bpy = import_bpy()
-            bpy.ops.scene.new(type='EMPTY')
-            blender_scene = bpy.context.scene
+    def _render(self, filepath, export_blend_path, filepath_queue, exception_queue):
+        try:
+            with Xvfb():
+                filepath = pathlib.Path(filepath)
+                bpy = import_bpy()
+                bpy.ops.scene.new(type='EMPTY')
+                blender_scene = bpy.context.scene
 
-            # load materials
-            if self.preset_path:
-                load_materials(bpy, self.root_dir / self.preset_path)
+                # load materials
+                if self.preset_path:
+                    load_materials(bpy, self.root_dir / self.preset_path)
 
-            for obj in self._objects:
-                obj.root_dir = self.root_dir
-                blender_scene.collection.children.link(obj.blender_collection(bpy))
+                for obj in self._objects:
+                    obj.root_dir = self.root_dir
+                    blender_scene.collection.children.link(obj.blender_collection(bpy))
 
-            # set render properties
-            blender_scene.render.resolution_x = self.resolution[0]
-            blender_scene.render.resolution_y = self.resolution[1]
-            blender_scene.render.engine = self.render_engine
-            blender_scene.render.film_transparent = self.transparant
-            blender_scene.render.image_settings.color_mode = self.color_mode
+                # set render properties
+                blender_scene.render.resolution_x = self.resolution[0]
+                blender_scene.render.resolution_y = self.resolution[1]
+                blender_scene.render.engine = self.render_engine
+                blender_scene.render.film_transparent = self.transparant
+                blender_scene.render.image_settings.color_mode = self.color_mode
 
-            # set lighting mode
-            if self.light:
-                blender_scene.display.shading.light = self.light
-            if self.studio_light:
-                blender_scene.display.shading.studio_light = self.studio_light
+                # set lighting mode
+                if self.light:
+                    blender_scene.display.shading.light = self.light
+                if self.studio_light:
+                    blender_scene.display.shading.studio_light = self.studio_light
 
-            # add default camera when no camera present
-            if len(self.cameras(blender_scene)) == 0:
-                camera = BlenderCamera()
-                self.add_object(camera)
-                blender_scene.collection.children.link(camera.blender_collection(bpy))
+                # add default camera when no camera present
+                if len(self.cameras(blender_scene)) == 0:
+                    camera = BlenderCamera()
+                    self.add_object(camera)
+                    blender_scene.collection.children.link(camera.blender_collection(bpy))
 
-            # render for all cameras
-            cameras = self.cameras(blender_scene)
-            for n, camera in enumerate(cameras):
-                if len(cameras) != 1:
-                    render_file = filepath.parent / f'{n:03d}_{filepath.name}'
-                else:
-                    render_file = filepath
+                # render for all cameras
+                cameras = self.cameras(blender_scene)
+                if len(cameras) == 0:
+                    raise RuntimeError('No cameras set, fallback default camera did not work.')
 
-                filepath_queue.put(render_file)
-                blender_scene.render.filepath = str(render_file)
+                for n, camera in enumerate(cameras):
+                    if len(cameras) != 1:
+                        render_file = filepath.parent / f'{n:03d}_{filepath.name}'
+                    else:
+                        render_file = filepath
 
-                blender_scene.camera = camera
-                if self.zoom_to_all:
-                    self._zoom_to_all(bpy)
-                bpy.ops.render.render(write_still=True)
+                    filepath_queue.put(render_file)
+                    blender_scene.render.filepath = str(render_file)
 
-            if export_blend_path:
-                self.export_blend_file(bpy, export_blend_path)
+                    blender_scene.camera = camera
+                    if self.zoom_to_all:
+                        self._zoom_to_all(bpy)
+                    ret_val = list(bpy.ops.render.render(write_still=True))
+                    if ret_val[0] != 'FINISHED':
+                        raise Exception(
+                            f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
+
+                if export_blend_path:
+                    self.export_blend_file(bpy, export_blend_path)
+        except Exception as e:  #pylint: disable=broad-except # Intentional broad except
+            exception_queue.put(e)
 
     def add_object(self, blender_object: BlenderObject):
         self._objects.append(blender_object)
