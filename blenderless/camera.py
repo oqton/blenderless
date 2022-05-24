@@ -15,6 +15,8 @@ class BlenderCamera(BlenderObject):
             self._object_data = bpy.data.cameras.new(name=self.name)
             self._object_data.type = self.camera_type
             self._object_data.clip_end = self.clipping_distance
+            if self.zoom_to_all:
+                self._object_data.name += 'zoomToAll'
         return self._object_data
 
 

@@ -155,7 +155,7 @@ class Scene():
                     blender_scene.render.filepath = str(render_file)
 
                     blender_scene.camera = camera
-                    if camera.zoom_to_all:
+                    if 'zoomToAll' in camera.data.name:
                         self._zoom_to_all(bpy)
                     ret_val = list(bpy.ops.render.render(write_still=True))
                     if ret_val[0] != 'FINISHED':
