@@ -8,7 +8,8 @@ from blenderless.blender_object import BlenderObject
 class BlenderCamera(BlenderObject):
     camera_type: str = 'ORTHO'
     clipping_distance: float = 5000
-
+    zoom_to_all = True
+    
     def object_data(self, bpy):
         if self._object_data is None:
             self._object_data = bpy.data.cameras.new(name=self.name)

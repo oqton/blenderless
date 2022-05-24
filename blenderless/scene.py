@@ -33,7 +33,6 @@ class Scene():
                  transparant=True,
                  color_mode='RGBA',
                  resolution=(512, 512),
-                 zoom_to_all=True,
                  preset_path=None,
                  light='MATCAP',
                  studio_light='check_rim_dark.exr',
@@ -44,7 +43,6 @@ class Scene():
         self.transparant = transparant
         self.color_mode = color_mode
         self.resolution = resolution
-        self.zoom_to_all = zoom_to_all
         self.preset_path = preset_path
         self.light = light
         self.studio_light = studio_light
@@ -157,7 +155,7 @@ class Scene():
                     blender_scene.render.filepath = str(render_file)
 
                     blender_scene.camera = camera
-                    if self.zoom_to_all:
+                    if camera.zoom_to_all:
                         self._zoom_to_all(bpy)
                     ret_val = list(bpy.ops.render.render(write_still=True))
                     if ret_val[0] != 'FINISHED':
