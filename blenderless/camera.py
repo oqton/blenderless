@@ -1,5 +1,5 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from blenderless.blender_object import BlenderObject
 
@@ -8,7 +8,7 @@ from blenderless.blender_object import BlenderObject
 class BlenderCamera(BlenderObject):
     camera_type: str = 'ORTHO'
     clipping_distance: float = 5000
-    zoom_to_all = True
+    zoom_to_all: bool = field(default=True)
 
     def object_data(self, bpy):
         if self._object_data is None:
