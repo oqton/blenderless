@@ -21,7 +21,7 @@ Furthermore, the `bpy` interface has a steep learning curve.
 
 ## How to use this
 
-### Resources:
+### Resources
  - You can find basic examples in the [unit tests](https://github.com/oqton/blenderless/tree/master/tests/test_data).
  - [Notebook examples](https://github.com/oqton/blenderless/tree/master/notebooks) (point clouds, mesh face colors, ...)
 
