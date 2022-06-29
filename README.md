@@ -102,6 +102,8 @@ objects: # See blenderless.geometry and blenderless.material
 
 ```buildoutcfg
 sudo apt-get install xvfb
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
 pipx install poetry==1.1.5
 make .venv
 ```
