@@ -1,0 +1,8 @@
+# By default Bazel generates empty __init__.py files when building
+# Python binaries and tests. This prevents that behavior. This is
+# necessary because Python protobuf libraries are generated with
+# namespace packages, which can't have __init__.py in them.
+build --incompatible_default_to_explicit_init_py
+
+# https://docs.bazel.build/versions/main/best-practices.html#using-the-bazelrc-file
+try-import %workspace%/user.bazelrc
