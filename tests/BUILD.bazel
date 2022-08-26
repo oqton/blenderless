@@ -1,0 +1,15 @@
+load("//build_tools:testing.bzl", "py_pytest_tests")
+load("@pip_deps//:requirements.bzl", "requirement")
+
+py_pytest_tests(
+    name = "tests",
+    size = "medium",
+    srcs = glob(["*.py"]),
+    data = glob(
+        ["test_data/**"],
+    ),
+    deps = [
+        "//blenderless",
+        requirement("scikit-image"),
+    ],
+)

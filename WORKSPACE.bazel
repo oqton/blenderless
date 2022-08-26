@@ -4,13 +4,14 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_python",
-    sha256 = "778197e26c5fbeb07ac2a2c5ae405b30f6cb7ad1f5510ea6fdac03bded96cc6f",
-    urls = ["https://github.com/bazelbuild/rules_python/releases/download/0.2.0/rules_python-0.2.0.tar.gz"],
+    sha256 = "c03246c11efd49266e8e41e12931090b613e12a59e6f55ba2efd29a7cb8b4258",
+    strip_prefix = "rules_python-0.11.0",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.11.0.tar.gz",
 )
 
 load("@rules_python//python:pip.bzl", "pip_parse")
 
-PYTHON_INTERPRETER = "python3.7"
+PYTHON_INTERPRETER = "python3.8"
 
 pip_parse(
     name = "pip_deps",
@@ -21,20 +22,3 @@ pip_parse(
 load("@pip_deps//:requirements.bzl", install_pip_deps = "install_deps")
 
 install_pip_deps()
-
-load("//build_tools:python_configure.bzl", "python_configure")
-
-python_configure(
-    name = "local_python_config",
-    python_interpreter = PYTHON_INTERPRETER,
-)
-
-register_toolchains("@local_python_config//:py3_toolchain")
-
-http_archive(
-    name = "blenderpy",
-    build_file = "//build_tools:blenderpy.BUILD.bazel",
-    sha256 = "120a0394f6edd4703b610d7d963369513781db69bd4d2b126a36abf9c064594a",
-    type = "zip",
-    urls = ["https://github.com/TylerGubala/blenderpy/releases/download/v2.91a0/bpy-2.91a0-cp37-cp37m-manylinux2014_x86_64.whl"],
-)

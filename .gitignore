@@ -121,3 +121,7 @@ tests/test_data/configs/*/scene.blend*
 notebooks/
 !notebooks/*.ipynb
 output/*
+
+# Bazel
+bazel-*
+user.bazelrc

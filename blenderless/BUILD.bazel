@@ -1,5 +1,5 @@
-load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_runtime")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 
 py_library(
     name = "blenderless_lib",
@@ -15,7 +15,7 @@ py_library(
     ],
     imports = ["."],
     deps = [
-        "@blenderpy",
+        "//bpy_install",
         requirement("numpy"),
         requirement("tqdm"),
         requirement("trimesh"),
@@ -27,30 +27,15 @@ py_library(
     ],
 )
 
-py_runtime(
-    name = "blenderless_runtime",
-    files = [],
-    interpreter = ".venv/bin/python",
-    python_version = "PY3",
-)
-
 py_binary(
     name = "blenderless",
     srcs = [
         "cli.py",
     ],
-    data = glob(["test_data/**/*"]),
     main = "cli.py",
-    srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
         ":blenderless_lib",
         requirement("click"),
     ],
-)
-
-filegroup(
-    name = "blenderless_zip",
-    srcs = [":blenderless"],
-    output_group = "python_zip_file",
 )

@@ -6,8 +6,10 @@ hydra-core
 imageio
 omegaconf
 xvfbwrapper
+scikit-image
 setuptools
 importlib_metadata
 pillow
+pytest
 typing_extensions
 zipp
