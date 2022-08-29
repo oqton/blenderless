@@ -36,7 +36,6 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":blenderless_lib",
-        "@bpy",
         requirement("click"),
     ],
 )

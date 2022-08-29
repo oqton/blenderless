@@ -19,7 +19,6 @@ py_pytest_tests(
     ),
     deps = [
         "//blenderless",
-        "@bpy",
         requirement("scikit-image"),
     ],
 )
