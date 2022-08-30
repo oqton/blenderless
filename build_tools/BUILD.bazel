@@ -1,1 +1,4 @@
-exports_files(["pytest_runner.py.tpl"])
+exports_files([
+    "pytest_runner.py.tpl",
+    "repositories.bzl",
+])
