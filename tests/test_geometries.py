@@ -42,8 +42,7 @@ def test_render_transformation():
     # Instrument how the vertices are passed to bpy
     called_verts = b_mesh._object_data.from_pydata.call_args[0][0]
 
-    # Trimesh stores points in reverse order
-    npt.assert_allclose(gt_verts[::-1, :], called_verts)
+    npt.assert_allclose(gt_verts, called_verts)
 
 
 def test_render_label():
