@@ -34,7 +34,8 @@ class Scene():
                  preset_path=None,
                  light='MATCAP',
                  studio_light='check_rim_dark.exr',
-                 root_dir=pathlib.Path('.')):
+                 root_dir=pathlib.Path('.'),
+                 num_threads=-1):
 
         self._objects = []
         self.render_engine = render_engine
@@ -45,6 +46,7 @@ class Scene():
         self.light = light
         self.studio_light = studio_light
         self.root_dir = root_dir
+        self.num_threads = num_threads
 
     @classmethod
     def from_config(cls, config_path, root_dir=None):
@@ -125,6 +127,9 @@ class Scene():
                 blender_scene.render.engine = self.render_engine
                 blender_scene.render.film_transparent = self.transparant
                 blender_scene.render.image_settings.color_mode = self.color_mode
+                if self.num_threads > 0:
+                    blender_scene.render.threads = self.num_threads
+                    blender_scene.render.threads_mode = 'FIXED'
 
                 # set lighting mode
                 if self.light:
