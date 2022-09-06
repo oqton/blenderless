@@ -19,7 +19,7 @@ keywords = ["rendering", "blender", "headless", "3D"]
 python = "~3.7"
 pillow = "*"
 bpy = "==2.91a0"
-trimesh = "^3.9.24"
+trimesh = "^3.14.0"
 hydra-core = "^1.0.7"
 imageio = "*"
 xvfbwrapper = "^0.2.9"
