@@ -12,16 +12,7 @@ from blenderless.blender_object import BlenderObject
 from blenderless.camera import BlenderCamera
 from blenderless.material import load_materials
 
-
-def import_bpy():
-    """Import blenderpy.
-
-    The reason for this late-loading is that communication with Blender is
-    restricted to a single separate render thread.
-    """
-    import bpy
-    return bpy
-
+import bpy
 
 class Scene():
 
@@ -79,96 +70,67 @@ class Scene():
         return filepath
 
     def render(self, filepath, export_blend_path=None):
-        """Start render in separate process in which bpy is imported."""
-        filepath_queue = Queue()
-        exception_queue = Queue()
+        with Xvfb():
+            filepath = pathlib.Path(filepath)
+            bpy.ops.scene.new(type='EMPTY')
+            blender_scene = bpy.context.scene
 
-        if 'DISPLAY' in os.environ and ':' not in os.environ['DISPLAY']:
-            del os.environ['DISPLAY']  # Workaround xfvb-wrapper bug
+            # load materials
+            if self.preset_path:
+                load_materials(bpy, self.root_dir / self.preset_path)
 
-        if isinstance(filepath, str):
-            filepath = pathlib.PosixPath(filepath)
-        p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue, exception_queue))
-        p.start()
-        p.join()
+            for obj in self._objects:
+                obj.root_dir = self.root_dir
+                blender_scene.collection.children.link(obj.blender_collection(bpy))
 
-        while not exception_queue.empty():
-            raise RuntimeError from exception_queue.get()
+            # set render properties
+            blender_scene.render.resolution_x = self.resolution[0]
+            blender_scene.render.resolution_y = self.resolution[1]
+            blender_scene.render.engine = self.render_engine
+            blender_scene.render.film_transparent = self.transparant
+            blender_scene.render.image_settings.color_mode = self.color_mode
+            if self.num_threads > 0:
+                blender_scene.render.threads = self.num_threads
+                blender_scene.render.threads_mode = 'FIXED'
 
-        filepath_list = []
-        while not filepath_queue.empty():
-            filepath_list.append(filepath_queue.get())
+            # set lighting mode
+            if self.light:
+                blender_scene.display.shading.light = self.light
+            if self.studio_light:
+                blender_scene.display.shading.studio_light = self.studio_light
 
-        if len(filepath_list) == 0:
-            raise RuntimeError('Render process did not push any image files.')
+            # add default camera when no camera present
+            if len(self.cameras(blender_scene)) == 0:
+                camera = BlenderCamera()
+                self.add_object(camera)
+                blender_scene.collection.children.link(camera.blender_collection(bpy))
 
-        return filepath_list
+            # render for all cameras
+            cameras = self.cameras(blender_scene)
+            if len(cameras) == 0:
+                raise RuntimeError('No cameras set, fallback default camera did not work.')
 
-    @staticmethod
-    def _render(self, filepath, export_blend_path, filepath_queue, exception_queue):
-        try:
-            with Xvfb():
-                filepath = pathlib.Path(filepath)
-                bpy = import_bpy()
-                bpy.ops.scene.new(type='EMPTY')
-                blender_scene = bpy.context.scene
+            render_files = []
+            for n, camera in enumerate(cameras):
+                if len(cameras) != 1:
+                    render_file = filepath.parent / f'{n:03d}_{filepath.name}'
+                else:
+                    render_file = filepath
 
-                # load materials
-                if self.preset_path:
-                    load_materials(bpy, self.root_dir / self.preset_path)
+                render_files.append(render_file)
+                blender_scene.render.filepath = str(render_file)
 
-                for obj in self._objects:
-                    obj.root_dir = self.root_dir
-                    blender_scene.collection.children.link(obj.blender_collection(bpy))
+                blender_scene.camera = camera
+                if 'zoomToAll' in camera.data.name:
+                    self._zoom_to_all()
+                ret_val = list(bpy.ops.render.render(write_still=True))
+                if ret_val[0] != 'FINISHED':
+                    raise RuntimeError(
+                        f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
 
-                # set render properties
-                blender_scene.render.resolution_x = self.resolution[0]
-                blender_scene.render.resolution_y = self.resolution[1]
-                blender_scene.render.engine = self.render_engine
-                blender_scene.render.film_transparent = self.transparant
-                blender_scene.render.image_settings.color_mode = self.color_mode
-                if self.num_threads > 0:
-                    blender_scene.render.threads = self.num_threads
-                    blender_scene.render.threads_mode = 'FIXED'
-
-                # set lighting mode
-                if self.light:
-                    blender_scene.display.shading.light = self.light
-                if self.studio_light:
-                    blender_scene.display.shading.studio_light = self.studio_light
-
-                # add default camera when no camera present
-                if len(self.cameras(blender_scene)) == 0:
-                    camera = BlenderCamera()
-                    self.add_object(camera)
-                    blender_scene.collection.children.link(camera.blender_collection(bpy))
-
-                # render for all cameras
-                cameras = self.cameras(blender_scene)
-                if len(cameras) == 0:
-                    raise RuntimeError('No cameras set, fallback default camera did not work.')
-
-                for n, camera in enumerate(cameras):
-                    if len(cameras) != 1:
-                        render_file = filepath.parent / f'{n:03d}_{filepath.name}'
-                    else:
-                        render_file = filepath
-
-                    filepath_queue.put(render_file)
-                    blender_scene.render.filepath = str(render_file)
-
-                    blender_scene.camera = camera
-                    if 'zoomToAll' in camera.data.name:
-                        self._zoom_to_all(bpy)
-                    ret_val = list(bpy.ops.render.render(write_still=True))
-                    if ret_val[0] != 'FINISHED':
-                        raise Exception(
-                            f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
-
-                if export_blend_path:
-                    self.export_blend_file(bpy, export_blend_path)
-        except Exception as e:  #pylint: disable=broad-except # Intentional broad except
-            exception_queue.put(e)
+            if export_blend_path:
+                self.export_blend_file(export_blend_path)
+            return render_files
 
     def add_object(self, blender_object: BlenderObject):
         self._objects.append(blender_object)
@@ -178,7 +140,7 @@ class Scene():
         return [obj for obj in blender_scene.objects if obj.type == 'CAMERA']
 
     @staticmethod
-    def _zoom_to_all(bpy):
+    def _zoom_to_all():
         """Zoom to view all objects."""
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
@@ -187,5 +149,5 @@ class Scene():
         bpy.ops.view3d.camera_to_view_selected()
 
     @staticmethod
-    def export_blend_file(bpy, filepath):
+    def export_blend_file(filepath):
         bpy.ops.wm.save_as_mainfile(filepath=str(filepath))
