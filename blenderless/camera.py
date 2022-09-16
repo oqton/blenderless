@@ -1,6 +1,8 @@
 import math
 from dataclasses import dataclass, field
 
+import bpy
+
 from blenderless.blender_object import BlenderObject
 
 
@@ -10,7 +12,7 @@ class BlenderCamera(BlenderObject):
     clipping_distance: float = 5000
     zoom_to_all: bool = field(default=True)
 
-    def object_data(self, bpy):
+    def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.cameras.new(name=self.name)
             self._object_data.type = self.camera_type

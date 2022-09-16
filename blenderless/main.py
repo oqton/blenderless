@@ -22,10 +22,10 @@ class Blenderless():
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
 
-        scene = Scene(**kwargs)
+        scene = Scene()
         scene.add_object(Mesh(mesh_path=mesh_path))
         scene.add_object(SphericalCoordinateCamera(azimuth=azimuth, elevation=elevation, theta=theta))
-        render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path)
+        render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path, **kwargs)
         return render_paths[0]
 
     @classmethod
@@ -50,8 +50,8 @@ class Blenderless():
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.gif'
 
-        scene = Scene(**kwargs)
+        scene = Scene()
         scene.add_object(Mesh(mesh_path=mesh_path))
         for angle in range(0, 360, int(360 / frames)):
             scene.add_object(SphericalCoordinateCamera(azimuth=angle, elevation=elevation, theta=theta))
-        return scene.render_gif(dest_path, duration=duration / frames, export_blend_path=cls.export_blend_path)
+        return scene.render_gif(dest_path, duration=duration / frames, export_blend_path=cls.export_blend_path, **kwargs)

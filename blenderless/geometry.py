@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
 
+import bpy
 import numpy as np
 import trimesh
 
@@ -20,16 +21,16 @@ class Geometry(BlenderObject):
     meta: dict = field(default_factory=dict)
     labels: np.ndarray = None
 
-    def blender_object(self, bpy):
-        super().blender_object(bpy)
+    def blender_object(self):
+        super().blender_object()
         if self.colormap is not None:
             self.material_list = MaterialRGBA.material_list_from_colormap(self.colormap)
 
         if self.material_list:
             for material in self.material_list:
-                add_material(self._blender_object, material.blender_material(bpy))
+                add_material(self._blender_object, material.blender_material())
         else:
-            add_material(self._blender_object, self.material.blender_material(bpy))
+            add_material(self._blender_object, self.material.blender_material())
 
         return self._blender_object
 
@@ -50,7 +51,7 @@ class Mesh(Geometry):
     mesh: trimesh.Trimesh = None
     transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
 
-    def object_data(self, bpy):
+    def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.meshes.new(name=self.name)
             if self.mesh_path is not None:
@@ -78,7 +79,7 @@ class PointCloud(Geometry):
     point_size: float = 0.3
     transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
 
-    def object_data(self, bpy):
+    def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.meshes.new(name=self.name)
 
@@ -118,7 +119,7 @@ class BlenderLabel(Geometry):
     outline_size: float = 0.0
     outline_material: Material = MaterialFromName(material_name='Material')
 
-    def blender_objects(self, bpy):
+    def blender_objects(self):
         objects = []
         bpy.ops.object.text_add()
         text_inside = bpy.data.objects.values()[-1]
@@ -128,14 +129,14 @@ class BlenderLabel(Geometry):
         text_inside.data.size = self.size
         text_inside.location = self.xyz
 
-        add_material(text_inside, self.material.blender_material(bpy))
+        add_material(text_inside, self.material.blender_material())
         objects.append(text_inside)
         if self.outline_size > 0:
             # add outline
             text_outline = duplicate_object(text_inside)
             text_outline.data.bevel_depth = self.size * self.outline_size
             text_outline.data.fill_mode = 'NONE'
-            add_material(text_outline, self.outline_material.blender_material(bpy))
+            add_material(text_outline, self.outline_material.blender_material())
             bpy.context.scene.collection.objects.link(text_outline)
             objects.append(text_outline)
 
@@ -145,10 +146,10 @@ class BlenderLabel(Geometry):
 
         return objects
 
-    def blender_collection(self, bpy):
+    def blender_collection(self):
         if self._blender_collection is None:
             self._blender_collection = bpy.data.collections.new(self.name)
-            for obj in self.blender_objects(bpy):
+            for obj in self.blender_objects():
                 self._blender_collection.objects.link(obj)
         return self._blender_collection
 

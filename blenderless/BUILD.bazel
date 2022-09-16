@@ -17,13 +17,10 @@ py_library(
     deps = [
         "@bpy",
         requirement("numpy"),
-        requirement("tqdm"),
         requirement("trimesh"),
         requirement("hydra-core"),
         requirement("imageio"),
-        requirement("xvfbwrapper"),
         requirement("omegaconf"),
-        requirement("pillow"),
     ],
 )
 

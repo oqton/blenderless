@@ -2,7 +2,6 @@ import logging
 import pathlib
 
 import click
-from tqdm import tqdm
 
 from blenderless import Blenderless
 
@@ -31,7 +30,7 @@ def image(file_path, root):
     """Render geometries to image"""
     geometry_files = list(pathlib.Path(root).glob(file_path))
     l.info(f'found {len(geometry_files)} geometry files')
-    for geometry_file in tqdm(geometry_files):
+    for geometry_file in geometry_files:
         l.debug(f'render: {geometry_file}')
         Blenderless.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
         l.info((geometry_file.parent / f'{geometry_file.stem}.png').absolute())
@@ -45,7 +44,7 @@ def gif(file_path, root):
     """Render geometries to gif"""
     geometry_files = list(pathlib.Path(root).glob(file_path))
     l.info(f'found {len(geometry_files)} geometry files')
-    for geometry_file in tqdm(geometry_files):
+    for geometry_file in geometry_files:
         l.debug(f'render: {geometry_file}')
         Blenderless.gif(geometry_file, geometry_file.parent / f'{geometry_file.stem}.gif')
         l.debug(f'render successful')

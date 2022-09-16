@@ -2,16 +2,17 @@ import pathlib
 from dataclasses import dataclass
 from typing import List
 
+import bpy
 import numpy as np
 
 DEFAULT_MATERIAL_PATH = pathlib.Path(__file__).parent / 'data/materials.blend'
 
 
-def load_default_materials(bpy):
-    load_materials(bpy, DEFAULT_MATERIAL_PATH)
+def load_default_materials():
+    load_materials(DEFAULT_MATERIAL_PATH)
 
 
-def load_materials(bpy, filepath):
+def load_materials(filepath):
     """Load materials from materials file.
 
     Use the MaterialFromName class to load materials from this file.
@@ -32,7 +33,7 @@ class MaterialRGBA(Material):
     """Create diffuse single color material."""
     rgba: List[float] = (0, 0, 255, 255)  # default color blue
 
-    def blender_material(self, bpy):
+    def blender_material(self):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials.new(name=self.material_name)
             self._blender_material.diffuse_color = self.rgba
@@ -63,7 +64,7 @@ class MaterialFromName(Material):
     """
     _blender_material = None
 
-    def blender_material(self, bpy):
+    def blender_material(self):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials[self.material_name]
         return self._blender_material

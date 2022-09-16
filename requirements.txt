@@ -1,15 +1,9 @@
 click
 hydra-core
 imageio
-importlib_metadata
 numpy
 omegaconf
 pillow
 pytest
 scikit-image
-setuptools
-tqdm
 trimesh>=3.5.25
-typing_extensions
-xvfbwrapper
-zipp

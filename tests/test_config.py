@@ -19,7 +19,7 @@ def test_load_scene_from_config(example_path):
     blend_scene_filepath = example_path / 'scene.blend'
 
     scene = Scene.from_config(example_path / 'scene.yaml')
-    render_paths = scene.render(test_output_filepath, export_blend_path=blend_scene_filepath)
+    render_paths = scene.render(test_output_filepath, export_blend_path=blend_scene_filepath, num_threads=8)
     assert test_output_filepath.exists()
     assert render_paths[0] == test_output_filepath
 
