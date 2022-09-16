@@ -14,12 +14,29 @@ from blenderless.material import load_materials
 
 class Scene:
 
-    def __init__(self, root_dir=None, preset_path=None):
+    def __init__(self,
+                 root_dir=None,
+                 preset_path=None,
+                 render_engine='CYCLES',
+                 transparant=True,
+                 color_mode='RGBA',
+                 resolution=(512, 512),
+                 light='MATCAP',
+                 studio_light='check_rim_dark.exr',
+                 num_threads=0):
         self._objects = []
         self._root_dir = root_dir
         if self._root_dir is None:
             self._root_dir = pathlib.Path()
         self._preset_path = preset_path
+
+        self._render_engine = render_engine
+        self._transparant = transparant
+        self._color_mode = color_mode
+        self._resolution = resolution
+        self._light = light
+        self._studio_light = studio_light
+        self._num_threads = num_threads
 
     @classmethod
     def from_config(cls, config_path, root_dir=None):
@@ -49,16 +66,7 @@ class Scene:
         imageio.mimsave(filepath, images, format='GIF', duration=duration / len(images))
         return filepath
 
-    def render(self,
-               filepath,
-               export_blend_path=None,
-               render_engine='CYCLES',
-               transparant=True,
-               color_mode='RGBA',
-               resolution=(512, 512),
-               light='MATCAP',
-               studio_light='check_rim_dark.exr',
-               num_threads=-1):
+    def render(self, filepath, export_blend_path=None):
         filepath = pathlib.Path(filepath)
         bpy.ops.scene.new(type='EMPTY')
         blender_scene = bpy.context.scene
@@ -71,20 +79,18 @@ class Scene:
             blender_scene.collection.children.link(obj.blender_collection())
 
         # Set rendering properties.
-        blender_scene.render.resolution_x = resolution[0]
-        blender_scene.render.resolution_y = resolution[1]
-        blender_scene.render.engine = render_engine
-        blender_scene.render.film_transparent = transparant
-        blender_scene.render.image_settings.color_mode = color_mode
-        if num_threads > 0:
-            blender_scene.render.threads = num_threads
+        blender_scene.render.resolution_x = self._resolution[0]
+        blender_scene.render.resolution_y = self._resolution[1]
+        blender_scene.render.engine = self._render_engine
+        blender_scene.render.film_transparent = self._transparant
+        blender_scene.render.image_settings.color_mode = self._color_mode
+        if self._num_threads > 0:
+            blender_scene.render.threads = self._num_threads
             blender_scene.render.threads_mode = 'FIXED'
 
         # Set lighting mode.
-        if light:
-            blender_scene.display.shading.light = light
-        if studio_light:
-            blender_scene.display.shading.studio_light = studio_light
+        blender_scene.display.shading.light = self._light
+        blender_scene.display.shading.studio_light = self._studio_light
 
         # Add default camera when no camera present.
         if len(self.cameras(blender_scene)) == 0:

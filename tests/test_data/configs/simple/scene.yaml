@@ -1,6 +1,6 @@
 scene:
   preset_path: ../../preset.blend
-
+  num_threads: 8
 
 cameras:
   - _target_: blenderless.camera.SphericalCoordinateCamera

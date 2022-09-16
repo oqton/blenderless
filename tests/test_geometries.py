@@ -11,15 +11,15 @@ from blenderless.material import MaterialRGBA
 from blenderless.scene import Scene
 
 
-def test_render_mesh(mesh_paths):
+def test_render_mesh(mesh_paths, num_rendering_threads):
     for mesh_path in mesh_paths:
-        scene = Scene()
+        scene = Scene(num_threads=num_rendering_threads)
 
         blender_mesh = Mesh(name='foo_mesh', mesh=trimesh.load(mesh_path))
         scene.add_object(blender_mesh)
         with tempfile.TemporaryDirectory() as tmpdirname:
             render_path = tmpdirname / pathlib.Path('render.png')
-            scene.render(render_path, num_threads=8)
+            scene.render(render_path)
             assert render_path.exists()
 
 
@@ -46,8 +46,8 @@ def test_render_mesh(mesh_paths):
 #     npt.assert_allclose(gt_verts, called_verts)
 
 
-def test_render_label():
-    scene = Scene()
+def test_render_label(num_rendering_threads):
+    scene = Scene(num_threads=num_rendering_threads)
     red_material = MaterialRGBA(rgba=(128, 0, 0, 1))
     yellow_material = MaterialRGBA(rgba=(128, 128, 0, 1))
     blender_label = BlenderLabel(label_value='test',
@@ -57,7 +57,7 @@ def test_render_label():
     scene.add_object(blender_label)
     with tempfile.TemporaryDirectory() as tmpdirname:
         render_path = tmpdirname / pathlib.Path('render.png')
-        scene.render(render_path, num_threads=8)
+        scene.render(render_path)
         assert render_path.exists()
 
 
