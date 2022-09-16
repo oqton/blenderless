@@ -18,4 +18,4 @@ docker_build_args=(
 )
 
 docker build ${docker_build_args[@]} -t ${IMAGE} .
-docker run -it --rm -v$(pwd):/output ${IMAGE} bash -c "cp /blender_ws/bpy-$BLENDER_VERSION-python$PYTHON_VERSION-x86_64-linux-gnu.tar.zst /output/"
+docker run -it --rm -v$(pwd):/output ${IMAGE} bash -c "cp /blender_ws/bpy-$BLENDER_VERSION-headless-python$PYTHON_VERSION-x86_64-linux-gnu.tar.zst /output/"

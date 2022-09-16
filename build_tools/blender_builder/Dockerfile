@@ -33,6 +33,7 @@ RUN apt-get install -y \
 RUN mkdir build \
     && cd build \
     && cmake -C ../blender/build_files/cmake/config/bpy_module.cmake \
+        -DWITH_HEADLESS=ON \
         -DWITH_INSTALL_PORTABLE=ON \
         -DPYTHON_INCLUDE_DIR=/usr/include/python$PYTHON_VERSION \
         -DPYTHON_LIBRARY=/usr/lib/python$PYTHON_VERSION/config-$PYTHON_VERSION-x86_64-linux-gnu/libpython$PYTHON_VERSION-pic.a \
@@ -42,6 +43,6 @@ RUN mkdir build \
 
 RUN cd build && ninja install
 
-RUN tar --zstd -cf bpy-$BLENDER_VERSION-python$PYTHON_VERSION-x86_64-linux-gnu.tar.zst install/
+RUN tar --zstd -cf bpy-$BLENDER_VERSION-headless-python$PYTHON_VERSION-x86_64-linux-gnu.tar.zst install/
 
 RUN cd install && python$PYTHON_VERSION -c "import bpy"
