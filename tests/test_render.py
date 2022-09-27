@@ -1,5 +1,4 @@
 from blenderless import Blenderless
-import sys
 
 
 def test_render(mesh_paths, tmp_path, num_rendering_threads):

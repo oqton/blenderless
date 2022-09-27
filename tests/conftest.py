@@ -17,6 +17,7 @@ def mesh_paths(test_data_path):
 def example_config_path(test_data_path):
     return test_data_path / 'configs' / 'simple' / 'scene.yaml'
 
+
 @pytest.fixture
 def num_rendering_threads():
     return 8
