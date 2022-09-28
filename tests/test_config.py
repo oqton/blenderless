@@ -19,6 +19,8 @@ def test_load_scene_from_config(example_path, test_outputs_dir):
     os.makedirs(outputs_dir)
 
     test_output_filepath = outputs_dir / 'test_output.png'
+    test_output_filepath = pathlib.Path(
+        '/home/avlaminck/oqton/repos/blenderless/tests/test_data/configs') / outputs_dir.name / 'test_output.png'
     blend_scene_filepath = outputs_dir / 'scene.blend'
 
     scene = Scene.from_config(example_path / 'scene.yaml')
