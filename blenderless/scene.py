@@ -20,9 +20,8 @@ class Scene:
                  transparant=True,
                  color_mode='RGBA',
                  resolution=(512, 512),
-                 light='MATCAP',
-                 studio_light='check_rim_dark.exr',
                  num_threads=0):
+
         self._objects = []
         self._root_dir = root_dir
         if self._root_dir is None:
@@ -33,8 +32,6 @@ class Scene:
         self._transparant = transparant
         self._color_mode = color_mode
         self._resolution = resolution
-        self._light = light
-        self._studio_light = studio_light
         self._num_threads = num_threads
 
     @classmethod
@@ -45,6 +42,7 @@ class Scene:
             root_dir = pathlib.Path(config_path).parent
         else:
             root_dir = pathlib.Path(root_dir)
+
         scene = hydra.utils.instantiate(config.scene, _target_=cls, root_dir=root_dir)
 
         for camera in config.cameras:
@@ -86,10 +84,6 @@ class Scene:
         if self._num_threads > 0:
             blender_scene.render.threads = self._num_threads
             blender_scene.render.threads_mode = 'FIXED'
-
-        # Set lighting mode.
-        blender_scene.display.shading.light = self._light
-        blender_scene.display.shading.studio_light = self._studio_light
 
         # Add default camera when no camera present.
         if len(self.cameras(blender_scene)) == 0:

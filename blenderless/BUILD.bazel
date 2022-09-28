@@ -8,6 +8,7 @@ py_library(
         "blender_object.py",
         "camera.py",
         "geometry.py",
+        "light.py",
         "main.py",
         "material.py",
         "scene.py",

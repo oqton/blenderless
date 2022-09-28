@@ -10,6 +10,14 @@ cameras:
     distance: 1
 
 objects:
+  - _target_: blenderless.light.SphericalCoordinateLight
+    type: SUN
+    energy: 5
+    azimuth: 0
+    elevation: 90
+    theta: -90
+    distance: 2
+
   - _target_: blenderless.geometry.BlenderLabel
     label_value: '42'
     outline_size: 0.01
