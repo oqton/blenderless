@@ -19,5 +19,8 @@ jobs:
       - name: Setup Bazel
         uses: bazelbuild/setup-bazelisk@v2
 
+      - name: Install apt deps
+        run: sudo apt-get install -y libgl1
+
       - name: Run tests
         run: bazel test tests --test_output=errors
