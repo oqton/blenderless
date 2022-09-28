@@ -19,12 +19,23 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.32.0
+    hooks:
+      - id: yapf
+        args: [-i, --style, .style.yapf]
   - repo: https://github.com/myint/autoflake.git
-    rev: v1.4
+    rev: v1.5.3
     hooks:
-      - id: autoflake # removes unused imports
-        args: [--remove-all-unused-imports, --ignore-init-module-imports, -i]
-  - repo: https://github.com/Irvenae/pre-commit-yapf-isort
-    rev: 'c18a981'
+      - id: autoflake
+        args: [--remove-all-unused-imports, --ignore-init-module-imports, --in-place]
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.8.2
     hooks:
-      - id: yapf-isort
+      - id: reorder-python-imports
+        args: [--py37-plus]
+  - repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+        args: [--max-line-length=120]

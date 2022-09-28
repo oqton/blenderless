@@ -6,7 +6,10 @@ import numpy as np
 import numpy.testing as npt
 import trimesh
 
-from blenderless.geometry import BlenderLabel, Geometry, Mesh, PointCloud
+from blenderless.geometry import BlenderLabel
+from blenderless.geometry import Geometry
+from blenderless.geometry import Mesh
+from blenderless.geometry import PointCloud
 from blenderless.material import MaterialRGBA
 from blenderless.scene import Scene
 

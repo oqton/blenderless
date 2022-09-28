@@ -19,5 +19,5 @@ jobs:
       - name: Setup Bazel
         uses: bazelbuild/setup-bazelisk@v2
 
-      - name: Run tests 
+      - name: Run tests
         run: bazel test tests --test_output=errors

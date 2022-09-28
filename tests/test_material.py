@@ -1,7 +1,8 @@
 import numpy as np
 import numpy.testing as npt
 
-from blenderless.material import MaterialFromName, MaterialRGBA
+from blenderless.material import MaterialFromName
+from blenderless.material import MaterialRGBA
 
 
 def test_create_material_from_name():

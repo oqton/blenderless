@@ -3,7 +3,7 @@ import logging
 # Load IPython only if available
 try:
     from IPython.display import Image, display
-except:
+except ImportError:
     pass
 
 logger = logging.getLogger()

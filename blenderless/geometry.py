@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
 
 import bpy
@@ -6,7 +7,10 @@ import numpy as np
 import trimesh
 
 from blenderless.blender_object import BlenderObject
-from blenderless.material import Material, MaterialFromName, MaterialRGBA, add_material
+from blenderless.material import add_material
+from blenderless.material import Material
+from blenderless.material import MaterialFromName
+from blenderless.material import MaterialRGBA
 
 
 @dataclass

@@ -5,7 +5,7 @@ import click
 
 from blenderless import Blenderless
 
-l = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -29,12 +29,12 @@ def main(verbose, export_blend_path):
 def image(file_path, root):
     """Render geometries to image"""
     geometry_files = list(pathlib.Path(root).glob(file_path))
-    l.info(f'found {len(geometry_files)} geometry files')
+    logger.info(f'found {len(geometry_files)} geometry files')
     for geometry_file in geometry_files:
-        l.debug(f'render: {geometry_file}')
+        logger.debug(f'render: {geometry_file}')
         Blenderless.render(geometry_file, geometry_file.parent / f'{geometry_file.stem}.png')
-        l.info((geometry_file.parent / f'{geometry_file.stem}.png').absolute())
-        l.debug(f'render successful')
+        logger.info((geometry_file.parent / f'{geometry_file.stem}.png').absolute())
+        logger.debug('render successful')
 
 
 @main.command()
@@ -43,11 +43,11 @@ def image(file_path, root):
 def gif(file_path, root):
     """Render geometries to gif"""
     geometry_files = list(pathlib.Path(root).glob(file_path))
-    l.info(f'found {len(geometry_files)} geometry files')
+    logger.info(f'found {len(geometry_files)} geometry files')
     for geometry_file in geometry_files:
-        l.debug(f'render: {geometry_file}')
+        logger.debug(f'render: {geometry_file}')
         Blenderless.gif(geometry_file, geometry_file.parent / f'{geometry_file.stem}.gif')
-        l.debug(f'render successful')
+        logger.debug('render successful')
 
 
 @main.command()
@@ -56,8 +56,8 @@ def gif(file_path, root):
 def config(config_path, output_file):
     """Render scene from config file"""
     Blenderless.render_from_config(config_path, output_file)
-    l.info(pathlib.Path(output_file).absolute())
-    l.debug(f'render successful')
+    logger.info(pathlib.Path(output_file).absolute())
+    logger.debug('render successful')
 
 
 if __name__ == '__main__':

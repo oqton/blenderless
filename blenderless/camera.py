@@ -1,5 +1,6 @@
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 
 import bpy
 
@@ -54,7 +55,7 @@ class SphericalCoordinateCamera(BlenderCamera):
             yaw = 2 * math.pi - yaw
         pitch = 0
         tmp = min(max(tx * cx + ty * cy, -1), 1)
-        #roll = math.acos(tx * cx + ty * cy)
+        # roll = math.acos(tx * cx + ty * cy)
         roll = math.acos(tmp)
         if cz < 0:
             roll = -roll
