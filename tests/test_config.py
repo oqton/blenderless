@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 import numpy as np
@@ -9,14 +10,16 @@ from blenderless.scene import Scene
 
 
 def examples():
-    return (pathlib.Path(__file__).parent / 'test_data' / 'configs').glob('*')
+    return pathlib.Path('tests/test_data/configs').glob('*')
 
 
 @pytest.mark.parametrize("example_path", examples())
-def test_load_scene_from_config(example_path):
+def test_load_scene_from_config(example_path, test_outputs_dir):
+    outputs_dir = test_outputs_dir / os.path.basename(example_path)
+    os.makedirs(outputs_dir)
 
-    test_output_filepath = example_path / 'test_output.png'
-    blend_scene_filepath = example_path / 'scene.blend'
+    test_output_filepath = outputs_dir / 'test_output.png'
+    blend_scene_filepath = outputs_dir / 'scene.blend'
 
     scene = Scene.from_config(example_path / 'scene.yaml')
     render_paths = scene.render(test_output_filepath, export_blend_path=blend_scene_filepath)

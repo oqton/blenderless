@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 import pytest
@@ -5,7 +6,7 @@ import pytest
 
 @pytest.fixture
 def test_data_path():
-    return pathlib.Path(__file__).parent / 'test_data'
+    return pathlib.Path('tests/test_data')
 
 
 @pytest.fixture
@@ -21,3 +22,8 @@ def example_config_path(test_data_path):
 @pytest.fixture
 def num_rendering_threads():
     return 8
+
+
+@pytest.fixture
+def test_outputs_dir() -> pathlib.Path:
+    return pathlib.Path(os.getenv('TEST_UNDECLARED_OUTPUTS_DIR', ''))
