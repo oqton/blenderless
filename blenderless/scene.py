@@ -67,6 +67,7 @@ class Scene:
     def render(self, filepath, export_blend_path=None):
         filepath = pathlib.Path(filepath)
 
+        bpy.ops.wm.read_factory_settings(use_empty=True)
         if self._preset_path is not None and self._preset_scene is not None:
             bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
 
@@ -126,6 +127,7 @@ class Scene:
 
         if export_blend_path:
             self.export_blend_file(export_blend_path)
+
         return render_files
 
     def add_object(self, blender_object: BlenderObject):

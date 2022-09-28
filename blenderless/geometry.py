@@ -19,7 +19,7 @@ class Geometry(BlenderObject):
 
     This class allows a material to be added to the object.
     """
-    material: Material = MaterialRGBA()
+    material: Material = field(default_factory=MaterialRGBA)
     material_list: List[Material] = None
     colormap: np.ndarray = None
     meta: dict = field(default_factory=dict)
