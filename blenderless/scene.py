@@ -16,6 +16,7 @@ class Scene:
     def __init__(self,
                  root_dir=None,
                  preset_path=None,
+                 preset_scene=None,
                  render_engine='CYCLES',
                  transparant=True,
                  color_mode='RGBA',
@@ -27,7 +28,7 @@ class Scene:
         if self._root_dir is None:
             self._root_dir = pathlib.Path()
         self._preset_path = preset_path
-
+        self._preset_scene = preset_scene
         self._render_engine = render_engine
         self._transparant = transparant
         self._color_mode = color_mode
@@ -65,7 +66,16 @@ class Scene:
 
     def render(self, filepath, export_blend_path=None):
         filepath = pathlib.Path(filepath)
-        bpy.ops.scene.new(type='EMPTY')
+
+        if self._preset_path is not None and self._preset_scene is not None:
+            bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
+
+            scene = [scene for scene in bpy.data.scenes if scene.name == self._preset_scene]
+            if len(scene) == 0:
+                raise ValueError(f'scene: {self._preset_scene} not found in preset file: {self._preset_path}')
+            bpy.context.window.scene = scene[0]
+        else:
+            bpy.ops.scene.new(type='EMPTY')
         blender_scene = bpy.context.scene
 
         if self._preset_path is not None:
