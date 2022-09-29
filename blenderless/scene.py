@@ -18,6 +18,7 @@ class Scene:
                  preset_path=None,
                  preset_scene=None,
                  render_engine='CYCLES',
+                 num_samples=None,
                  transparant=True,
                  color_mode='RGBA',
                  resolution=(512, 512),
@@ -30,6 +31,7 @@ class Scene:
         self._preset_path = preset_path
         self._preset_scene = preset_scene
         self._render_engine = render_engine
+        self._num_samples = num_samples
         self._transparant = transparant
         self._color_mode = color_mode
         self._resolution = resolution
@@ -75,6 +77,8 @@ class Scene:
             if len(scene) == 0:
                 raise ValueError(f'scene: {self._preset_scene} not found in preset file: {self._preset_path}')
             bpy.context.window.scene = scene[0]
+            self.delete_all_objects()
+
         else:
             bpy.ops.scene.new(type='EMPTY')
         blender_scene = bpy.context.scene
@@ -87,6 +91,8 @@ class Scene:
             blender_scene.collection.children.link(obj.blender_collection())
 
         # Set rendering properties.
+        if self._num_samples is not None:
+            bpy.context.scene.cycles.samples = self._num_samples
         blender_scene.render.resolution_x = self._resolution[0]
         blender_scene.render.resolution_y = self._resolution[1]
         blender_scene.render.engine = self._render_engine
@@ -113,8 +119,6 @@ class Scene:
                 render_file = filepath.parent / f'{n:03d}_{filepath.name}'
             else:
                 render_file = filepath
-
-            render_files.append(render_file)
             blender_scene.render.filepath = str(render_file)
 
             blender_scene.camera = camera
@@ -124,6 +128,7 @@ class Scene:
             if ret_val[0] != 'FINISHED':
                 raise RuntimeError(
                     f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
+            render_files.append(pathlib.Path(bpy.context.scene.render.filepath))
 
         if export_blend_path:
             self.export_blend_file(export_blend_path)
@@ -149,3 +154,22 @@ class Scene:
     @staticmethod
     def export_blend_file(filepath):
         bpy.ops.wm.save_as_mainfile(filepath=str(filepath))
+
+    @staticmethod
+    def delete_all_objects():
+        """
+        Deletes all objects in the current scene
+        """
+        deleteListObjects = [
+            'MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'HAIR', 'POINTCLOUD', 'VOLUME', 'GPENCIL', 'ARMATURE',
+            'LATTICE', 'LIGHT_PROBE', 'CAMERA', 'SPEAKER'
+        ]
+
+        bpy.ops.object.select_all(action='DESELECT')
+        # Select all objects in the scene to be deleted:
+        for o in bpy.context.scene.objects:
+            if o.type in deleteListObjects:
+                o.select_set(True)
+            else:
+                o.select_set(False)
+        bpy.ops.object.delete()
