@@ -161,8 +161,8 @@ class Scene:
         Deletes all objects in the current scene
         """
         deleteListObjects = [
-            'MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'HAIR', 'POINTCLOUD', 'VOLUME', 'GPENCIL', 'ARMATURE',
-            'LATTICE', 'LIGHT_PROBE', 'CAMERA', 'SPEAKER'
+            'MESH', 'CURVE', 'META', 'FONT', 'HAIR', 'POINTCLOUD', 'VOLUME', 'GPENCIL', 'ARMATURE', 'LATTICE',
+            'LIGHT_PROBE', 'CAMERA', 'SPEAKER'
         ]
 
         bpy.ops.object.select_all(action='DESELECT')
