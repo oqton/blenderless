@@ -60,7 +60,8 @@ class Mesh(Geometry):
             self._object_data = bpy.data.meshes.new(name=self.name)
             if self.mesh_path is not None:
                 self.mesh = trimesh.load(self.root_dir / self.mesh_path)
-            verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
+            if np.array_equal(np.identity(4), self.transformation):
+                verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
             self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())
             self._set_face_material_indices()
 
@@ -132,7 +133,6 @@ class BlenderLabel(Geometry):
         text_inside.data.body = self.label_value
         text_inside.data.size = self.size
         text_inside.location = self.xyz
-
         add_material(text_inside, self.material.blender_material())
         objects.append(text_inside)
         if self.outline_size > 0:
