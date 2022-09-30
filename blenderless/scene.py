@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 
 from blenderless.blender_object import BlenderObject
 from blenderless.camera import BlenderCamera
+from blenderless.geometry import HorizontalPlane
 from blenderless.material import load_materials
 
 
@@ -22,6 +23,7 @@ class Scene:
                  transparant=True,
                  color_mode='RGBA',
                  resolution=(512, 512),
+                 shadow_plane=False,
                  num_threads=0):
 
         self._objects = []
@@ -34,6 +36,7 @@ class Scene:
         self._num_samples = num_samples
         self._transparant = transparant
         self._color_mode = color_mode
+        self._shadow_plane = shadow_plane
         self._resolution = resolution
         self._num_threads = num_threads
 
@@ -113,6 +116,16 @@ class Scene:
         if len(cameras) == 0:
             raise RuntimeError('No cameras set, fallback default camera did not work.')
 
+        # Set zoom for all cameras.
+        for camera in cameras:
+            if 'zoomToAll' in camera.data.name:
+                blender_scene.camera = camera
+                self._zoom_to_all()
+
+        # Add shadow plane when all objects are in the scene.
+        if self._shadow_plane:
+            self.add_shadow_plane(blender_scene)
+
         render_files = []
         for n, camera in enumerate(cameras):
             if len(cameras) != 1:
@@ -120,10 +133,8 @@ class Scene:
             else:
                 render_file = filepath
             blender_scene.render.filepath = str(render_file)
-
             blender_scene.camera = camera
-            if 'zoomToAll' in camera.data.name:
-                self._zoom_to_all()
+
             ret_val = list(bpy.ops.render.render(write_still=True))
             if ret_val[0] != 'FINISHED':
                 raise RuntimeError(
@@ -137,6 +148,15 @@ class Scene:
 
     def add_object(self, blender_object: BlenderObject):
         self._objects.append(blender_object)
+
+    def add_shadow_plane(self, blender_scene):
+        # Find lowest point.
+        lowest_points = []
+        for object in self.get_all_objects(['MESH']):
+            lowest_points.append(min([v.co.z for v in object.data.vertices]))
+        plane = HorizontalPlane(height=min(lowest_points), is_shadow_catcher=True)
+        self.add_object(plane)
+        blender_scene.collection.children.link(plane.blender_collection())
 
     @staticmethod
     def cameras(blender_scene):
@@ -156,6 +176,11 @@ class Scene:
         bpy.ops.wm.save_as_mainfile(filepath=str(filepath))
 
     @staticmethod
+    def get_all_objects(object_types):
+        # Select all objects in the scene to be deleted:
+        return [o for o in bpy.context.scene.objects if o.type in object_types]
+
+    @staticmethod
     def delete_all_objects():
         """
         Deletes all objects in the current scene
@@ -164,12 +189,8 @@ class Scene:
             'MESH', 'CURVE', 'META', 'FONT', 'HAIR', 'POINTCLOUD', 'VOLUME', 'GPENCIL', 'ARMATURE', 'LATTICE',
             'LIGHT_PROBE', 'CAMERA', 'SPEAKER'
         ]
-
         bpy.ops.object.select_all(action='DESELECT')
         # Select all objects in the scene to be deleted:
-        for o in bpy.context.scene.objects:
-            if o.type in deleteListObjects:
-                o.select_set(True)
-            else:
-                o.select_set(False)
+        for o in Scene.get_all_objects(deleteListObjects):
+            o.select_set(True)
         bpy.ops.object.delete()

@@ -3,7 +3,7 @@ load("@pip_deps//:requirements.bzl", "requirement")
 
 py_pytest_tests(
     name = "tests",
-    size = "medium",
+    size = "large",
     srcs = [
         "conftest.py",
         "test_camera.py",

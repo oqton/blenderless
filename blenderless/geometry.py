@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import List
 
+import bmesh
 import bpy
 import numpy as np
 import trimesh
@@ -24,6 +25,7 @@ class Geometry(BlenderObject):
     colormap: np.ndarray = None
     meta: dict = field(default_factory=dict)
     labels: np.ndarray = None
+    is_shadow_catcher: bool = False
 
     def blender_object(self):
         super().blender_object()
@@ -35,6 +37,9 @@ class Geometry(BlenderObject):
                 add_material(self._blender_object, material.blender_material())
         else:
             add_material(self._blender_object, self.material.blender_material())
+
+        if self.is_shadow_catcher:
+            self._blender_object.cycles.is_shadow_catcher = True
 
         return self._blender_object
 
@@ -64,6 +69,26 @@ class Mesh(Geometry):
                 verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
             self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())
             self._set_face_material_indices()
+
+        return self._object_data
+
+
+@dataclass
+class HorizontalPlane(Geometry):
+    height: float = 0
+    size: float = 10
+    transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
+
+    def object_data(self):
+        if self._object_data is None:
+            self._object_data = bpy.data.meshes.new(name=self.name)
+            bm = bmesh.new()
+            bm.verts.new((self.size, self.size, self.height))
+            bm.verts.new((self.size, -self.size, self.height))
+            bm.verts.new((-self.size, self.size, self.height))
+            bm.verts.new((-self.size, -self.size, self.height))
+            bmesh.ops.contextual_create(bm, geom=bm.verts)
+            bm.to_mesh(self._object_data)
 
         return self._object_data
 

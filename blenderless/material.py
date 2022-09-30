@@ -32,7 +32,7 @@ class Material:
 @dataclass
 class MaterialRGBA(Material):
     """Create diffuse single color material."""
-    rgba: List[float] = (0, 0, 200, 255)  # default color blue
+    rgba: List[float] = (200, 200, 200, 255)  # default color white
 
     def blender_material(self):
         if self._blender_material is None:
