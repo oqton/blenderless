@@ -1,6 +1,7 @@
 import pathlib
 from dataclasses import dataclass
 from typing import List
+from typing import Optional
 
 import bpy
 import numpy as np
@@ -62,11 +63,16 @@ class MaterialFromName(Material):
 
     Load material from preset file, see load_materials().
     """
+    rgba: Optional[List[float]] = None
     _blender_material = None
 
     def blender_material(self):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials[self.material_name]
+            if self.rgba is not None:
+                if 'Principled BSDF' in self._blender_material.node_tree.nodes:
+                    self._blender_material = self._blender_material.copy()
+                    self._blender_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = self.rgba
         return self._blender_material
 
 
