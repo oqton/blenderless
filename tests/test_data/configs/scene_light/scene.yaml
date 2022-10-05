@@ -13,3 +13,10 @@ cameras:
 objects:
   - _target_: blenderless.geometry.Mesh
     mesh_path: ../../mesh/3DBenchy.stl
+    material:
+      _target_: blenderless.material.MaterialRGBA
+      rgba:
+        - 0
+        - 0
+        - 10
+        - 255

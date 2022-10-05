@@ -3,7 +3,7 @@ import tempfile
 
 import bpy
 import hydra
-import imageio
+import imageio.v2 as imageio
 from omegaconf import OmegaConf
 
 from blenderless.blender_object import BlenderObject
