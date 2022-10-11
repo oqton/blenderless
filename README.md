@@ -17,13 +17,12 @@ Example use-cases:
 ## How to use this
 
 ### Resources:
- - You can find basic examples in the [unit tests](https://github.com/oqton/blenderless/tree/master/tests/test_data).
- - [Notebook examples](https://github.com/oqton/blenderless/tree/master/notebooks) (point clouds, mesh face colors, ...)
 
+You can find basic examples in the [unit tests](https://github.com/oqton/blenderless/tree/master/tests/test_data).
 
 ### Python module
 
-The blenderless package can be loaded as a module. The main functionality is exposed using the Blenderless class. There is support for Jupyter Notebooks as the images/gifs will be shown as IPython Image objects automatically.
+The blenderless package can be loaded as a module. The main functionality is exposed using the Blenderless class.
 
 
 ```python
