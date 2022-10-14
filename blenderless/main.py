@@ -6,7 +6,6 @@ from typing import Optional
 from blenderless.camera import SphericalCoordinateCamera
 from blenderless.geometry import Mesh
 from blenderless.scene import Scene
-from blenderless.utils import notebook_preview
 
 
 class Blenderless():
@@ -16,7 +15,6 @@ class Blenderless():
     """Path to export the generated .blend file to."""
 
     @classmethod
-    @notebook_preview
     def render(cls, mesh_path, dest_path=None, azimuth=45, elevation=30, theta=0, **kwargs):
         """Render single frame as PNG."""
         if dest_path is None:
@@ -29,7 +27,6 @@ class Blenderless():
         return render_paths[0]
 
     @classmethod
-    @notebook_preview
     def render_from_config(cls, config_path, dest_path=None):
         """Render from config file."""
         if dest_path is None:
@@ -40,7 +37,6 @@ class Blenderless():
         return render_paths[0]
 
     @classmethod
-    @notebook_preview
     def gif(cls, mesh_path, dest_path=None, elevation=30, theta=0, frames=60, duration=2, **kwargs):
         """Render a sequence of frames and export as GIF.
 

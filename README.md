@@ -2,16 +2,11 @@
 
 Blenderless is the Python package for easy headless rendering using Blender.
 
-While Blender is a fantastic open-source 3D modeling software which can be run from the command line, there are still some inconveniences when rendering from a headless server:
-
- - the blender python interface `bpy` can only be imported a single time,
- - and, there is no framebuffer for blender to write to.
-
+While Blender is a fantastic open-source 3D modeling software which can be run from the command line, there are still some inconveniences when rendering from a headless server.
 Furthermore, the `bpy` interface has a steep learning curve.
+This package is meant to overcome these issues in a easy-to-use manner.
 
- This package is meant to overcome these issues in a easy-to-use manner. It does so by first defining the entire scene and only interacting with the `bpy` at render time in a separate thread using a virtual framebuffer.
-
- Example use cases:
+Example use-cases:
   - Generating thumbnails or previews from 3D files.
   - Batch generation of views from 3D files.
   - Automatic generation of compositions of a set of meshes into a single scene
@@ -22,13 +17,12 @@ Furthermore, the `bpy` interface has a steep learning curve.
 ## How to use this
 
 ### Resources:
- - You can find basic examples in the [unit tests](https://github.com/oqton/blenderless/tree/master/tests/test_data).
- - [Notebook examples](https://github.com/oqton/blenderless/tree/master/notebooks) (point clouds, mesh face colors, ...)
 
+You can find basic examples in the [unit tests](https://github.com/oqton/blenderless/tree/master/tests/test_data).
 
 ### Python module
 
-The blenderless package can be loaded as a module. The main functionality is exposed using the Blenderless class. There is support for Jupyter Notebooks as the images/gifs will be shown as IPython Image objects automatically.
+The blenderless package can be loaded as a module. The main functionality is exposed using the Blenderless class.
 
 
 ```python
@@ -52,20 +46,20 @@ path_to_foo_gif = Blenderless.gif(cls, mesh_path, dest_path=None, elevation=30, 
 Render geometry file to image
 
 ```sh
-$ blenderless image foo.stl output.png
-$ blenderless --export-blend-path export.blend image foo.stl output.png # If .blend needs to be exported
+bazel run //blenderless -- image /path/to/foo.stl /path/to/output.png
+bazel run //blenderless -- --export-blend-path /path/to/export.blend image /path/to/foo.stl /path/to/output.png # If .blend needs to be exported
 ```
 
 Render geometry to gif with a camera looping around an object.
 
 ```sh
-$ blenderless gif foo.stl output.gif
+bazel run //blenderless -- gif /path/to/foo.stl /path/to/output.gif
 ```
 
 The following command rendera a YAML config to an image
 
 ```sh
-$ blenderless config scene.yml output.png
+bazel run //blenderless -- config /path/to/scene.yml /path/to/output.png
 ```
 
 ### YAML configuration files
@@ -95,21 +89,13 @@ objects: # See blenderless.geometry and blenderless.material
     label_value: '42'
 ```
 
-
-### Export blender file
-
 ## Install
 
-```buildoutcfg
-sudo apt-get install xvfb
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
-pipx install poetry==1.1.5
-make .venv
-```
+Make sure to have installed a recent Bazel >= 5.2 and Python3.8.
+Bazel will internally search for `python3.8` executable.
 
 ### Testing
 
 ```sh
-make test
+bazel test //...
 ```
