@@ -60,11 +60,14 @@ class Mesh(Geometry):
     mesh: trimesh.Trimesh = None
     transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
 
+    def load(self):
+        if self.mesh is None and self.mesh_path is not None:
+            self.mesh = trimesh.load(self.root_dir / self.mesh_path, process=False)
+
     def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.meshes.new(name=self.name)
-            if self.mesh_path is not None:
-                self.mesh = trimesh.load(self.root_dir / self.mesh_path)
+            self.load()
             if np.array_equal(np.identity(4), self.transformation):
                 verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
             self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())

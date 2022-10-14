@@ -1,3 +1,4 @@
+import multiprocessing
 import pathlib
 import tempfile
 
@@ -9,7 +10,13 @@ from omegaconf import OmegaConf
 from blenderless.blender_object import BlenderObject
 from blenderless.camera import BlenderCamera
 from blenderless.geometry import HorizontalPlane
+from blenderless.geometry import Mesh
 from blenderless.material import load_materials
+
+
+def preload_mesh(mesh):
+    mesh.load()
+    return mesh.mesh
 
 
 class Scene:
@@ -89,8 +96,18 @@ class Scene:
         if self._preset_path is not None:
             load_materials(self._root_dir / self._preset_path)
 
+        # Preload meshes
         for obj in self._objects:
             obj.root_dir = self._root_dir
+        blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
+
+        with multiprocessing.Pool(self._num_threads) as p:
+            meshes = p.map(preload_mesh, blender_meshes)
+        for mesh, blender_mesh in zip(meshes, blender_meshes):
+            blender_mesh.mesh = mesh
+
+        # Add objects to blender
+        for obj in self._objects:
             blender_scene.collection.children.link(obj.blender_collection())
 
         # Set rendering properties.
