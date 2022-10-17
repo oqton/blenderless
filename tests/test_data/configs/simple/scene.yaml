@@ -1,6 +1,6 @@
 scene:
   preset_path: ../../preset.blend
-
+  num_threads: 8
 
 cameras:
   - _target_: blenderless.camera.SphericalCoordinateCamera
@@ -10,6 +10,14 @@ cameras:
     distance: 1
 
 objects:
+  - _target_: blenderless.light.SphericalCoordinateLight
+    type: SUN
+    energy: 2
+    azimuth: 45
+    elevation: 30
+    theta: 0
+    distance: 2
+
   - _target_: blenderless.geometry.Mesh
     mesh_path: ../../mesh/3DBenchy.stl
     material:

@@ -1,13 +1,9 @@
-numpy
 click
-tqdm
-trimesh
 hydra-core
 imageio
+numpy
 omegaconf
-xvfbwrapper
-setuptools
-importlib_metadata
 pillow
-typing_extensions
-zipp
+pytest
+scikit-image
+trimesh>=3.5.25

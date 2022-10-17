@@ -1,52 +1,51 @@
-import os
+import multiprocessing
 import pathlib
 import tempfile
-from multiprocessing import Process, Queue
 
+import bpy
 import hydra
-import imageio
+import imageio.v2 as imageio
 from omegaconf import OmegaConf
-from xvfbwrapper import Xvfb
 
 from blenderless.blender_object import BlenderObject
 from blenderless.camera import BlenderCamera
+from blenderless.geometry import HorizontalPlane
+from blenderless.geometry import Mesh
 from blenderless.material import load_materials
 
 
-def import_bpy():
-    """Import blenderpy.
-
-    The reason for this late-loading is that communication with Blender is
-    restricted to a single separate render thread.
-    """
-    os.environ["BLENDER_SYSTEM_SCRIPTS"] = 'external/blenderpy/bpy-2.91a0.data/scripts/2.91/scripts'
-    os.environ["BLENDER_SYSTEM_DATAFILES"] = 'external/blenderpy/bpy-2.91a0.data/scripts/2.91/datafiles'
-    import bpy
-    return bpy
+def preload_mesh(mesh):
+    mesh.load()
+    return mesh.mesh
 
 
-class Scene():
+class Scene:
 
-    #pylint: disable=too-many-arguments
     def __init__(self,
-                 render_engine='BLENDER_WORKBENCH',
+                 root_dir=None,
+                 preset_path=None,
+                 preset_scene=None,
+                 render_engine='CYCLES',
+                 num_samples=None,
                  transparant=True,
                  color_mode='RGBA',
                  resolution=(512, 512),
-                 preset_path=None,
-                 light='MATCAP',
-                 studio_light='check_rim_dark.exr',
-                 root_dir=pathlib.Path('.')):
+                 shadow_plane=False,
+                 num_threads=0):
 
         self._objects = []
-        self.render_engine = render_engine
-        self.transparant = transparant
-        self.color_mode = color_mode
-        self.resolution = resolution
-        self.preset_path = preset_path
-        self.light = light
-        self.studio_light = studio_light
-        self.root_dir = root_dir
+        self._root_dir = root_dir
+        if self._root_dir is None:
+            self._root_dir = pathlib.Path()
+        self._preset_path = preset_path
+        self._preset_scene = preset_scene
+        self._render_engine = render_engine
+        self._num_samples = num_samples
+        self._transparant = transparant
+        self._color_mode = color_mode
+        self._shadow_plane = shadow_plane
+        self._resolution = resolution
+        self._num_threads = num_threads
 
     @classmethod
     def from_config(cls, config_path, root_dir=None):
@@ -56,13 +55,12 @@ class Scene():
             root_dir = pathlib.Path(config_path).parent
         else:
             root_dir = pathlib.Path(root_dir)
+
         scene = hydra.utils.instantiate(config.scene, _target_=cls, root_dir=root_dir)
 
-        # load cameras
         for camera in config.cameras:
             scene.add_object(hydra.utils.instantiate(camera))
 
-        # load objects
         for obj in config.objects:
             scene.add_object(hydra.utils.instantiate(obj))
 
@@ -79,103 +77,114 @@ class Scene():
         return filepath
 
     def render(self, filepath, export_blend_path=None):
-        """Start render in separate process in which bpy is imported."""
-        filepath_queue = Queue()
-        exception_queue = Queue()
+        filepath = pathlib.Path(filepath)
 
-        if 'DISPLAY' in os.environ and ':' not in os.environ['DISPLAY']:
-            del os.environ['DISPLAY']  # Workaround xfvb-wrapper bug
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        if self._preset_path is not None and self._preset_scene is not None:
+            bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
 
-        if isinstance(filepath, str):
-            filepath = pathlib.PosixPath(filepath)
-        p = Process(target=self._render, args=(self, filepath, export_blend_path, filepath_queue, exception_queue))
-        p.start()
-        p.join()
+            scene = [scene for scene in bpy.data.scenes if scene.name == self._preset_scene]
+            if len(scene) == 0:
+                raise ValueError(f'scene: {self._preset_scene} not found in preset file: {self._preset_path}')
+            bpy.context.window.scene = scene[0]
+            self.delete_all_objects()
 
-        while not exception_queue.empty():
-            raise RuntimeError from exception_queue.get()
+        else:
+            bpy.ops.scene.new(type='EMPTY')
+        blender_scene = bpy.context.scene
 
-        filepath_list = []
-        while not filepath_queue.empty():
-            filepath_list.append(filepath_queue.get())
+        if self._preset_path is not None:
+            load_materials(self._root_dir / self._preset_path)
 
-        if len(filepath_list) == 0:
-            raise RuntimeError('Render process did not push any image files.')
+        # Preload meshes.
+        for obj in self._objects:
+            obj.root_dir = self._root_dir
+        blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
 
-        return filepath_list
+        if self._num_threads > 1:
+            with multiprocessing.Pool(self._num_threads) as p:
+                meshes = p.map(preload_mesh, blender_meshes)
+        else:
+            meshes = [preload_mesh(m) for m in blender_meshes]
 
-    @staticmethod
-    def _render(self, filepath, export_blend_path, filepath_queue, exception_queue):
-        try:
-            with Xvfb():
-                filepath = pathlib.Path(filepath)
-                bpy = import_bpy()
-                bpy.ops.scene.new(type='EMPTY')
-                blender_scene = bpy.context.scene
+        for mesh, blender_mesh in zip(meshes, blender_meshes):
+            blender_mesh.mesh = mesh
 
-                # load materials
-                if self.preset_path:
-                    load_materials(bpy, self.root_dir / self.preset_path)
+        # Add objects to blender.
+        for obj in self._objects:
+            blender_scene.collection.children.link(obj.blender_collection())
 
-                for obj in self._objects:
-                    obj.root_dir = self.root_dir
-                    blender_scene.collection.children.link(obj.blender_collection(bpy))
+        # Set rendering properties.
+        if self._num_samples is not None:
+            bpy.context.scene.cycles.samples = self._num_samples
+        blender_scene.render.resolution_x = self._resolution[0]
+        blender_scene.render.resolution_y = self._resolution[1]
+        blender_scene.render.engine = self._render_engine
+        blender_scene.render.film_transparent = self._transparant
+        blender_scene.render.image_settings.color_mode = self._color_mode
+        if self._num_threads > 0:
+            blender_scene.render.threads = self._num_threads
+            blender_scene.render.threads_mode = 'FIXED'
 
-                # set render properties
-                blender_scene.render.resolution_x = self.resolution[0]
-                blender_scene.render.resolution_y = self.resolution[1]
-                blender_scene.render.engine = self.render_engine
-                blender_scene.render.film_transparent = self.transparant
-                blender_scene.render.image_settings.color_mode = self.color_mode
+        # Add default camera when no camera present.
+        if len(self.cameras(blender_scene)) == 0:
+            camera = BlenderCamera()
+            self.add_object(camera)
+            blender_scene.collection.children.link(camera.blender_collection())
 
-                # set lighting mode
-                if self.light:
-                    blender_scene.display.shading.light = self.light
-                if self.studio_light:
-                    blender_scene.display.shading.studio_light = self.studio_light
+        # Render for all cameras.
+        cameras = self.cameras(blender_scene)
+        if len(cameras) == 0:
+            raise RuntimeError('No cameras set, fallback default camera did not work.')
 
-                # add default camera when no camera present
-                if len(self.cameras(blender_scene)) == 0:
-                    camera = BlenderCamera()
-                    self.add_object(camera)
-                    blender_scene.collection.children.link(camera.blender_collection(bpy))
+        # Set zoom for all cameras.
+        for camera in cameras:
+            if 'zoomToAll' in camera.data.name:
+                blender_scene.camera = camera
+                self._zoom_to_all()
 
-                # render for all cameras
-                cameras = self.cameras(blender_scene)
-                if len(cameras) == 0:
-                    raise RuntimeError('No cameras set, fallback default camera did not work.')
+        # Add shadow plane when all objects are in the scene.
+        if self._shadow_plane:
+            self.add_shadow_plane(blender_scene)
 
-                for n, camera in enumerate(cameras):
-                    if len(cameras) != 1:
-                        render_file = filepath.parent / f'{n:03d}_{filepath.name}'
-                    else:
-                        render_file = filepath
+        render_files = []
+        for n, camera in enumerate(cameras):
+            if len(cameras) != 1:
+                render_file = filepath.parent / f'{n:03d}_{filepath.name}'
+            else:
+                render_file = filepath
+            blender_scene.render.filepath = str(render_file)
+            blender_scene.camera = camera
 
-                    filepath_queue.put(render_file)
-                    blender_scene.render.filepath = str(render_file)
+            ret_val = list(bpy.ops.render.render(write_still=True))
+            if ret_val[0] != 'FINISHED':
+                raise RuntimeError(
+                    f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
+            render_files.append(pathlib.Path(bpy.context.scene.render.filepath))
 
-                    blender_scene.camera = camera
-                    if 'zoomToAll' in camera.data.name:
-                        self._zoom_to_all(bpy)
-                    ret_val = list(bpy.ops.render.render(write_still=True))
-                    if ret_val[0] != 'FINISHED':
-                        raise Exception(
-                            f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
+        if export_blend_path:
+            self.export_blend_file(export_blend_path)
 
-                if export_blend_path:
-                    self.export_blend_file(bpy, export_blend_path)
-        except Exception as e:  #pylint: disable=broad-except # Intentional broad except
-            exception_queue.put(e)
+        return render_files
 
     def add_object(self, blender_object: BlenderObject):
         self._objects.append(blender_object)
+
+    def add_shadow_plane(self, blender_scene):
+        # Find lowest point.
+        lowest_points = []
+        for object in self.get_all_objects(['MESH']):
+            lowest_points.append(min([v.co.z for v in object.data.vertices]))
+        plane = HorizontalPlane(height=min(lowest_points), is_shadow_catcher=True)
+        self.add_object(plane)
+        blender_scene.collection.children.link(plane.blender_collection())
 
     @staticmethod
     def cameras(blender_scene):
         return [obj for obj in blender_scene.objects if obj.type == 'CAMERA']
 
     @staticmethod
-    def _zoom_to_all(bpy):
+    def _zoom_to_all():
         """Zoom to view all objects."""
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
@@ -184,5 +193,25 @@ class Scene():
         bpy.ops.view3d.camera_to_view_selected()
 
     @staticmethod
-    def export_blend_file(bpy, filepath):
+    def export_blend_file(filepath):
         bpy.ops.wm.save_as_mainfile(filepath=str(filepath))
+
+    @staticmethod
+    def get_all_objects(object_types):
+        # Select all objects in the scene to be deleted:
+        return [o for o in bpy.context.scene.objects if o.type in object_types]
+
+    @staticmethod
+    def delete_all_objects():
+        """
+        Deletes all objects in the current scene
+        """
+        deleteListObjects = [
+            'MESH', 'CURVE', 'META', 'FONT', 'HAIR', 'POINTCLOUD', 'VOLUME', 'GPENCIL', 'ARMATURE', 'LATTICE',
+            'LIGHT_PROBE', 'CAMERA', 'SPEAKER'
+        ]
+        bpy.ops.object.select_all(action='DESELECT')
+        # Select all objects in the scene to be deleted:
+        for o in Scene.get_all_objects(deleteListObjects):
+            o.select_set(True)
+        bpy.ops.object.delete()

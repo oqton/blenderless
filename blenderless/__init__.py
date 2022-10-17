@@ -1,1 +1,1 @@
-from blenderless.main import Blenderless
+from blenderless.main import Blenderless  # noqa

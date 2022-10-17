@@ -115,9 +115,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Test output
-tests/test_data/configs/*/test_output.png
-tests/test_data/configs/*/scene.blend*
-notebooks/
-!notebooks/*.ipynb
-output/*
+# Bazel
+bazel-*
+user.bazelrc

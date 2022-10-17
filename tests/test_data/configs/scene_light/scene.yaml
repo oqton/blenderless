@@ -1,0 +1,22 @@
+scene:
+  preset_path: ../../preset.blend
+  preset_scene: lights
+  num_threads: 8
+
+cameras:
+  - _target_: blenderless.camera.SphericalCoordinateCamera
+    azimuth: 45
+    elevation: 90
+    theta: 0
+    distance: 1
+
+objects:
+  - _target_: blenderless.geometry.Mesh
+    mesh_path: ../../mesh/3DBenchy.stl
+    material:
+      _target_: blenderless.material.MaterialRGBA
+      rgba:
+        - 0
+        - 0
+        - 10
+        - 255

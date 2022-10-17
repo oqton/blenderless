@@ -1,11 +1,17 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
 
+import bmesh
+import bpy
 import numpy as np
 import trimesh
 
 from blenderless.blender_object import BlenderObject
-from blenderless.material import Material, MaterialFromName, MaterialRGBA, add_material
+from blenderless.material import add_material
+from blenderless.material import Material
+from blenderless.material import MaterialFromName
+from blenderless.material import MaterialRGBA
 
 
 @dataclass
@@ -14,22 +20,26 @@ class Geometry(BlenderObject):
 
     This class allows a material to be added to the object.
     """
-    material: Material = MaterialFromName(material_name='Material')
+    material: Material = field(default_factory=MaterialRGBA)
     material_list: List[Material] = None
     colormap: np.ndarray = None
     meta: dict = field(default_factory=dict)
     labels: np.ndarray = None
+    is_shadow_catcher: bool = False
 
-    def blender_object(self, bpy):
-        super().blender_object(bpy)
+    def blender_object(self):
+        super().blender_object()
         if self.colormap is not None:
             self.material_list = MaterialRGBA.material_list_from_colormap(self.colormap)
 
         if self.material_list:
             for material in self.material_list:
-                add_material(self._blender_object, material.blender_material(bpy))
+                add_material(self._blender_object, material.blender_material())
         else:
-            add_material(self._blender_object, self.material.blender_material(bpy))
+            add_material(self._blender_object, self.material.blender_material())
+
+        if self.is_shadow_catcher:
+            self._blender_object.cycles.is_shadow_catcher = True
 
         return self._blender_object
 
@@ -50,14 +60,38 @@ class Mesh(Geometry):
     mesh: trimesh.Trimesh = None
     transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
 
-    def object_data(self, bpy):
+    def load(self):
+        if self.mesh is None and self.mesh_path is not None:
+            self.mesh = trimesh.load(self.root_dir / self.mesh_path, process=False)
+
+    def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.meshes.new(name=self.name)
-            if self.mesh_path is not None:
-                self.mesh = trimesh.load(self.root_dir / self.mesh_path)
-            verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
+            self.load()
+            if np.array_equal(np.identity(4), self.transformation):
+                verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
             self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())
             self._set_face_material_indices()
+
+        return self._object_data
+
+
+@dataclass
+class HorizontalPlane(Geometry):
+    height: float = 0
+    size: float = 10
+    transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
+
+    def object_data(self):
+        if self._object_data is None:
+            self._object_data = bpy.data.meshes.new(name=self.name)
+            bm = bmesh.new()
+            bm.verts.new((self.size, self.size, self.height))
+            bm.verts.new((self.size, -self.size, self.height))
+            bm.verts.new((-self.size, self.size, self.height))
+            bm.verts.new((-self.size, -self.size, self.height))
+            bmesh.ops.contextual_create(bm, geom=bm.verts)
+            bm.to_mesh(self._object_data)
 
         return self._object_data
 
@@ -78,7 +112,7 @@ class PointCloud(Geometry):
     point_size: float = 0.3
     transformation: np.ndarray = field(default_factory=lambda: np.identity(4))
 
-    def object_data(self, bpy):
+    def object_data(self):
         if self._object_data is None:
             self._object_data = bpy.data.meshes.new(name=self.name)
 
@@ -118,7 +152,7 @@ class BlenderLabel(Geometry):
     outline_size: float = 0.0
     outline_material: Material = MaterialFromName(material_name='Material')
 
-    def blender_objects(self, bpy):
+    def blender_objects(self):
         objects = []
         bpy.ops.object.text_add()
         text_inside = bpy.data.objects.values()[-1]
@@ -127,15 +161,14 @@ class BlenderLabel(Geometry):
         text_inside.data.body = self.label_value
         text_inside.data.size = self.size
         text_inside.location = self.xyz
-
-        add_material(text_inside, self.material.blender_material(bpy))
+        add_material(text_inside, self.material.blender_material())
         objects.append(text_inside)
         if self.outline_size > 0:
             # add outline
             text_outline = duplicate_object(text_inside)
             text_outline.data.bevel_depth = self.size * self.outline_size
             text_outline.data.fill_mode = 'NONE'
-            add_material(text_outline, self.outline_material.blender_material(bpy))
+            add_material(text_outline, self.outline_material.blender_material())
             bpy.context.scene.collection.objects.link(text_outline)
             objects.append(text_outline)
 
@@ -145,10 +178,10 @@ class BlenderLabel(Geometry):
 
         return objects
 
-    def blender_collection(self, bpy):
+    def blender_collection(self):
         if self._blender_collection is None:
             self._blender_collection = bpy.data.collections.new(self.name)
-            for obj in self.blender_objects(bpy):
+            for obj in self.blender_objects():
                 self._blender_collection.objects.link(obj)
         return self._blender_collection
 

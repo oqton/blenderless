@@ -1,17 +1,19 @@
 import pathlib
 from dataclasses import dataclass
 from typing import List
+from typing import Optional
 
+import bpy
 import numpy as np
 
 DEFAULT_MATERIAL_PATH = pathlib.Path(__file__).parent / 'data/materials.blend'
 
 
-def load_default_materials(bpy):
-    load_materials(bpy, DEFAULT_MATERIAL_PATH)
+def load_default_materials():
+    load_materials(DEFAULT_MATERIAL_PATH)
 
 
-def load_materials(bpy, filepath):
+def load_materials(filepath):
     """Load materials from materials file.
 
     Use the MaterialFromName class to load materials from this file.
@@ -30,9 +32,9 @@ class Material:
 @dataclass
 class MaterialRGBA(Material):
     """Create diffuse single color material."""
-    rgba: List[float] = (0, 0, 255, 255)  # default color blue
+    rgba: List[float] = (200, 200, 200, 255)  # default color white
 
-    def blender_material(self, bpy):
+    def blender_material(self):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials.new(name=self.material_name)
             self._blender_material.diffuse_color = self.rgba
@@ -61,11 +63,16 @@ class MaterialFromName(Material):
 
     Load material from preset file, see load_materials().
     """
+    rgba: Optional[List[float]] = None
     _blender_material = None
 
-    def blender_material(self, bpy):
+    def blender_material(self):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials[self.material_name]
+            if self.rgba is not None:
+                if 'Principled BSDF' in self._blender_material.node_tree.nodes:
+                    self._blender_material = self._blender_material.copy()
+                    self._blender_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = self.rgba
         return self._blender_material
 
 
