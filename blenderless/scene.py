@@ -96,17 +96,21 @@ class Scene:
         if self._preset_path is not None:
             load_materials(self._root_dir / self._preset_path)
 
-        # Preload meshes
+        # Preload meshes.
         for obj in self._objects:
             obj.root_dir = self._root_dir
         blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
 
-        with multiprocessing.Pool(self._num_threads) as p:
-            meshes = p.map(preload_mesh, blender_meshes)
+        if self._num_threads > 1:
+            with multiprocessing.Pool(self._num_threads) as p:
+                meshes = p.map(preload_mesh, blender_meshes)
+        else:
+            meshes = [preload_mesh(m) for m in blender_meshes]
+
         for mesh, blender_mesh in zip(meshes, blender_meshes):
             blender_mesh.mesh = mesh
 
-        # Add objects to blender
+        # Add objects to blender.
         for obj in self._objects:
             blender_scene.collection.children.link(obj.blender_collection())
 
