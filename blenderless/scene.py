@@ -101,7 +101,7 @@ class Scene:
             obj.root_dir = self._root_dir
         blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
 
-        with multiprocessing.Pool(self._num_threads) as p:
+        with multiprocessing.Pool(1 if self._num_threads < 1 else self._num_threads) as p:
             meshes = p.map(preload_mesh, blender_meshes)
         for mesh, blender_mesh in zip(meshes, blender_meshes):
             blender_mesh.mesh = mesh
