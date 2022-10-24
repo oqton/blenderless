@@ -41,7 +41,7 @@ RUN mkdir build \
         -DPYTHON_INCLUDE_DIR=/usr/include/python$PYTHON_VERSION \
         -DPYTHON_LIBRARY=/usr/lib/python$PYTHON_VERSION/config-$PYTHON_VERSION-x86_64-linux-gnu/libpython$PYTHON_VERSION-pic.a \
         -DPYTHON_LINKFLAGS="-Xlinker -export-dynamic -lexpat" \
-        -DTEST_PYTHON_EXE=/usr/bin/python3.8 \
+        -DTEST_PYTHON_EXE=/usr/bin/python$PYTHON_VERSION \
         -DCMAKE_INSTALL_PREFIX=/blender_ws/install \
         -G Ninja ../blender \
     && ninja -j12
