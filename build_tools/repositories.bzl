@@ -7,7 +7,7 @@ def blenderless_repositories():
     http_archive(
         name = "bpy",
         build_file = "@blenderless//build_tools:bpy.BUILD.bazel",
-        sha256 = "837dce978427a1b496d0c536f9365e88446eeb0faa3480d62a6f2f4c99c31cfd",
+        sha256 = "853c163881bbaf7c20e70f6df7a52a8e1ab0320be751d8986dbf649fd0e12a09",
         strip_prefix = "install",
-        url = "https://github.com/oqton/blenderless/releases/download/bpy-2.92.0-python3.8/bpy-2.92.0-headless-python3.8-x86_64-linux-gnu.tar.zst",
+        url = "https://github.com/oqton/blenderless/releases/download/bpy-2.92.0-python3.8/bpy-2.92.0-headless-python3.8-x86_64-linux-gnu-39bef315.tar.zst",
     )
