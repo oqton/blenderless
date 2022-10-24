@@ -30,13 +30,18 @@ RUN apt-get install -y \
         python$PYTHON_VERSION \
         zstd
 
+RUN rm -rf /blender_ws/lib/linux_centos7_x86_64/python
+
 RUN mkdir build \
     && cd build \
     && cmake -C ../blender/build_files/cmake/config/bpy_module.cmake \
         -DWITH_HEADLESS=ON \
         -DWITH_INSTALL_PORTABLE=ON \
+        -DPYTHON_VERSION=3.8 \
         -DPYTHON_INCLUDE_DIR=/usr/include/python$PYTHON_VERSION \
         -DPYTHON_LIBRARY=/usr/lib/python$PYTHON_VERSION/config-$PYTHON_VERSION-x86_64-linux-gnu/libpython$PYTHON_VERSION-pic.a \
+        -DPYTHON_LINKFLAGS="-Xlinker -export-dynamic -lexpat" \
+        -DTEST_PYTHON_EXE=/usr/bin/python3.8 \
         -DCMAKE_INSTALL_PREFIX=/blender_ws/install \
         -G Ninja ../blender \
     && ninja -j12
