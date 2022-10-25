@@ -1,6 +1,7 @@
 import multiprocessing
 import pathlib
 import tempfile
+from collections import defaultdict
 
 import bpy
 import hydra
@@ -71,14 +72,40 @@ class Scene:
             render_path = pathlib.Path(tmpdirname) / 'out.png'
             render_filepaths = self.render(render_path, **kwargs)
             images = []
-            for filename in render_filepaths:
-                images.append(imageio.imread(filename))
+            for filenames in render_filepaths.values():
+                images.append(imageio.imread(filenames[0]))
         imageio.mimsave(filepath, images, format='GIF', duration=duration / len(images))
         return filepath
 
-    def render(self, filepath, export_blend_path=None):
+    def render(self, filepath, export_blend_path=None, animation=False):
         filepath = pathlib.Path(filepath)
+        blender_scene = self.configure_blender_scene(export_blend_path)
 
+        num_frames = self.num_keyframes if animation else 1
+
+        render_files = defaultdict(list)
+        cameras = self.cameras(blender_scene)
+        for frame_idx in range(num_frames):
+            bpy.context.scene.frame_current = frame_idx
+            for n, camera in enumerate(cameras):
+                if len(cameras) != 1:
+                    render_file = filepath / camera.name / f'{frame_idx}.png'
+                else:
+                    render_file = filepath / f'{frame_idx}.png'
+                blender_scene.render.filepath = str(render_file)
+                blender_scene.camera = camera
+                if not render_file.parent.exists():
+                    render_file.parent.mkdir(parents=True)
+                ret_val = list(bpy.ops.render.render(write_still=True))
+                if ret_val[0] != 'FINISHED':
+                    raise RuntimeError(
+                        f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
+                render_files[camera.name].append(pathlib.Path(bpy.context.scene.render.filepath))
+        if len(render_files) == 1:
+            return list(render_files.values())[0]
+        return render_files
+
+    def configure_blender_scene(self, export_blend_path):
         bpy.ops.wm.read_factory_settings(use_empty=True)
         if self._preset_path is not None and self._preset_scene is not None:
             bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
@@ -146,26 +173,11 @@ class Scene:
         # Add shadow plane when all objects are in the scene.
         if self._shadow_plane:
             self.add_shadow_plane(blender_scene)
-
-        render_files = []
-        for n, camera in enumerate(cameras):
-            if len(cameras) != 1:
-                render_file = filepath.parent / f'{n:03d}_{filepath.name}'
-            else:
-                render_file = filepath
-            blender_scene.render.filepath = str(render_file)
-            blender_scene.camera = camera
-
-            ret_val = list(bpy.ops.render.render(write_still=True))
-            if ret_val[0] != 'FINISHED':
-                raise RuntimeError(
-                    f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
-            render_files.append(pathlib.Path(bpy.context.scene.render.filepath))
-
         if export_blend_path:
+            if not export_blend_path.parent.exists():
+                export_blend_path.parent.mkdir(parents=True)
             self.export_blend_file(export_blend_path)
-
-        return render_files
+        return blender_scene
 
     def add_object(self, blender_object: BlenderObject):
         self._objects.append(blender_object)
@@ -178,6 +190,10 @@ class Scene:
         plane = HorizontalPlane(height=min(lowest_points), is_shadow_catcher=True)
         self.add_object(plane)
         blender_scene.collection.children.link(plane.blender_collection())
+
+    @property
+    def num_keyframes(self):
+        return max([len(obj.keyframe_transformations) for obj in self._objects if isinstance(obj, BlenderObject)])
 
     @staticmethod
     def cameras(blender_scene):

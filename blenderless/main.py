@@ -11,7 +11,7 @@ from blenderless.scene import Scene
 class Blenderless():
     """Class to run render pipelines."""
 
-    export_blend_path: Optional[str] = None
+    export_blend_path: Optional[pathlib.Path] = None
     """Path to export the generated .blend file to."""
 
     @classmethod
@@ -34,7 +34,7 @@ class Blenderless():
 
         scene = Scene.from_config(config_path)
         render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path)
-        return render_paths[0]
+        return render_paths
 
     @classmethod
     def gif(cls, mesh_path, dest_path=None, elevation=30, theta=0, frames=60, duration=2, **kwargs):

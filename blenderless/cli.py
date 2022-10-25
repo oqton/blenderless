@@ -18,7 +18,7 @@ def main(verbose, export_blend_path):
     logging.addLevelName(logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
     logging.addLevelName(logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-    Blenderless.export_blend_path = export_blend_path
+    Blenderless.export_blend_path = pathlib.Path(export_blend_path)
     if export_blend_path:
         logging.info(f'Generated .blend file will be exported to: {export_blend_path}')
 
@@ -52,11 +52,11 @@ def gif(file_path, root):
 
 @main.command()
 @click.argument("config_path", required=True, type=click.Path(exists=True))
-@click.argument("output_file", default="render.png", required=False, type=str)
-def config(config_path, output_file):
+@click.argument("output_path", default=".", required=False, type=str)
+def config(config_path, output_path):
     """Render scene from config file"""
-    Blenderless.render_from_config(config_path, output_file)
-    logger.info(pathlib.Path(output_file).absolute())
+    render_paths = Blenderless.render_from_config(pathlib.Path(config_path), pathlib.Path(output_path))
+    logger.info(render_paths)
     logger.debug('render successful')
 
 

@@ -21,7 +21,7 @@ def example_config_path(test_data_path):
 
 @pytest.fixture
 def num_rendering_threads():
-    return 8
+    return 1
 
 
 @pytest.fixture

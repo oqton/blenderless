@@ -26,6 +26,23 @@ def test_render_mesh(mesh_paths, num_rendering_threads):
             assert render_path.exists()
 
 
+def test_render_animated_mesh(mesh_paths, num_rendering_threads, test_outputs_dir):
+    num_frames = 3
+    transformations = [
+        trimesh.transformations.translation_matrix(
+            (0, 0, z)) @ trimesh.transformations.rotation_matrix(z / 50, (0, 0, 1)) for z in range(num_frames)
+    ]
+    scene = Scene(num_threads=num_rendering_threads)
+    blender_mesh = Mesh(name='foo_mesh', mesh=trimesh.load(mesh_paths[0]), keyframe_transformations=transformations)
+    scene.add_object(blender_mesh)
+    render_path = test_outputs_dir / 'animation'
+    blend_path = render_path / 'animation.blend'
+    renders = scene.render(render_path, export_blend_path=blend_path, animation=True)
+    assert len(renders) == num_frames
+    for render_path in renders:
+        assert render_path.exists()
+
+
 # TODO(axelvlaminck) Please fix this.
 # def test_render_transformation():
 #     verts = np.eye(3, dtype=np.float32)

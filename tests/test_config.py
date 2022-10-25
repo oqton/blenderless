@@ -18,13 +18,12 @@ def test_load_scene_from_config(example_path, test_outputs_dir):
     outputs_dir = test_outputs_dir / os.path.basename(example_path)
     os.makedirs(outputs_dir)
 
-    test_output_filepath = outputs_dir / 'test_output.png'
     blend_scene_filepath = outputs_dir / 'scene.blend'
 
     scene = Scene.from_config(example_path / 'scene.yaml')
-    render_paths = scene.render(test_output_filepath, export_blend_path=blend_scene_filepath)
+    render_paths = scene.render(outputs_dir, export_blend_path=blend_scene_filepath)
+    test_output_filepath = render_paths[0]
     assert test_output_filepath.exists()
-    assert render_paths[0] == test_output_filepath
 
     # compare with reference
     reference_filepath = example_path / 'reference.png'

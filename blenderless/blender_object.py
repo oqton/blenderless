@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from typing import List
 
 import bpy
+import numpy as np
+import trimesh
 
 
 @dataclass
@@ -31,6 +33,7 @@ class BlenderObject(BlenderCollection):
     name: str = ''
     xyz: List[float] = (0, 0, 0)
     quaternion: List[float] = (1, 0, 0, 0)
+    keyframe_transformations: List[np.ndarray] = ()
     _blender_object = None
     _object_data = None
 
@@ -41,6 +44,15 @@ class BlenderObject(BlenderCollection):
         self._blender_object.location = self.xyz
         self._blender_object.rotation_mode = 'QUATERNION'
         self._blender_object.rotation_quaternion = self.quaternion
+        if self.keyframe_transformations:
+            for frame_idx, transformation in enumerate(self.keyframe_transformations):
+                scale, shear, angles, translate, perspective = trimesh.transformations.decompose_matrix(transformation)
+                self._blender_object.location = translate
+                self._blender_object.scale = scale
+                self._blender_object.rotation_quaternion = trimesh.transformations.quaternion_from_euler(*angles)
+                self._blender_object.keyframe_insert(data_path='location', frame=frame_idx)
+                self._blender_object.keyframe_insert(data_path='scale', frame=frame_idx)
+                self._blender_object.keyframe_insert(data_path='rotation_quaternion', frame=frame_idx)
         return self._blender_object
 
     @abstractmethod

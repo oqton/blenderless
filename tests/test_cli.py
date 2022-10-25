@@ -25,7 +25,7 @@ def test_config_rendering(example_config_path, tmp_path):
 
 def test_export_blender_path(example_config_path, tmp_path):
     runner = CliRunner()
-    output_file = tmp_path / 'render.png'
+    output_file = tmp_path
     blender_file = tmp_path / 'render.blend'
     result = runner.invoke(
         blenderless.cli.main,
