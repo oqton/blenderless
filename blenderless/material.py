@@ -70,9 +70,9 @@ class MaterialFromName(Material):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials[self.material_name]
             if self.rgba is not None:
-                if 'Principled BSDF' in self._blender_material.node_tree.nodes:
+                if 'RGB' in self._blender_material.node_tree.nodes:
                     self._blender_material = self._blender_material.copy()
-                    self._blender_material.node_tree.nodes["Principled BSDF"].inputs[0].default_value = self.rgba
+                    self._blender_material.node_tree.nodes['RGB'].outputs[0].default_value = self.rgba
         return self._blender_material
 
 

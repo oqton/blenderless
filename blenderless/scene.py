@@ -77,8 +77,8 @@ class Scene:
         imageio.mimsave(filepath, images, format='GIF', duration=duration / len(images))
         return filepath
 
-    def render(self, filepath, export_blend_path=None, animation=False):
-        filepath = pathlib.Path(filepath)
+    def render(self, output_path, export_blend_path=None, animation=False):
+        output_path = pathlib.Path(output_path)
         blender_scene = self.configure_blender_scene(export_blend_path)
 
         num_frames = self.num_keyframes if animation else 1
@@ -89,9 +89,9 @@ class Scene:
             bpy.context.scene.frame_current = frame_idx
             for n, camera in enumerate(cameras):
                 if len(cameras) != 1:
-                    render_file = filepath / camera.name / f'{frame_idx}.png'
+                    render_file = output_path / camera.name / f'{frame_idx}.png'
                 else:
-                    render_file = filepath / f'{frame_idx}.png'
+                    render_file = output_path / f'{frame_idx}.png'
                 blender_scene.render.filepath = str(render_file)
                 blender_scene.camera = camera
                 if not render_file.parent.exists():

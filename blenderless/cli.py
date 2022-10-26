@@ -1,3 +1,4 @@
+import json
 import logging
 import pathlib
 
@@ -18,7 +19,7 @@ def main(verbose, export_blend_path):
     logging.addLevelName(logging.WARNING, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
     logging.addLevelName(logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-    Blenderless.export_blend_path = pathlib.Path(export_blend_path)
+    Blenderless.export_blend_path = pathlib.Path(export_blend_path) if export_blend_path else None
     if export_blend_path:
         logging.info(f'Generated .blend file will be exported to: {export_blend_path}')
 
@@ -55,8 +56,13 @@ def gif(file_path, root):
 @click.argument("output_path", default=".", required=False, type=str)
 def config(config_path, output_path):
     """Render scene from config file"""
-    render_paths = Blenderless.render_from_config(pathlib.Path(config_path), pathlib.Path(output_path))
-    logger.info(render_paths)
+    output_path = pathlib.Path(output_path)
+    render_paths = Blenderless.render_from_config(pathlib.Path(config_path), output_path)
+    metadata = {}
+    metadata['render_paths'] = [str(path.absolute()) for path in render_paths]
+    with (output_path / 'meta.json').open("w") as f:
+        json.dump(metadata, f)
+    logger.info(json.dumps(metadata, indent=1))
     logger.debug('render successful')
 
 
