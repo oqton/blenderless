@@ -69,8 +69,19 @@ class Mesh(Geometry):
             self._object_data = bpy.data.meshes.new(name=self.name)
             self.load()
             if np.array_equal(np.identity(4), self.transformation):
-                verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
-            self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())
+                vertices = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
+            else:
+                vertices = self.mesh.vertices
+            faces = self.mesh.faces
+            num_vertices = len(vertices)
+            num_faces = len(faces)
+            self._object_data.vertices.add(num_vertices)
+            self._object_data.loops.add(num_faces * 3)
+            self._object_data.polygons.add(num_faces)
+            self._object_data.vertices.foreach_set("co", vertices.reshape(-1))
+            self._object_data.polygons.foreach_set("loop_total", np.ones(num_faces) * 3)
+            self._object_data.polygons.foreach_set("loop_start", np.arange(num_faces) * 3)
+            self._object_data.polygons.foreach_set("vertices", faces.reshape(-1))
             self._set_face_material_indices()
 
         return self._object_data
