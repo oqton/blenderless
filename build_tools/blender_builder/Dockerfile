@@ -24,6 +24,10 @@ RUN mkdir lib \
 
 ARG PYTHON_VERSION=3.10
 
+RUN apt-get install -y software-properties-common
+
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+
 RUN apt-get install -y \
         ninja-build \
         libpython$PYTHON_VERSION-dev \
