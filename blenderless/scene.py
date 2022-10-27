@@ -87,7 +87,11 @@ class Scene:
         cameras = self.cameras(blender_scene)
         for frame_idx in range(num_frames):
             bpy.context.scene.frame_current = frame_idx
+            # Set zoom
             for n, camera in enumerate(cameras):
+                if 'zoomToAll' in camera.data.name:
+                    blender_scene.camera = camera
+                    self._zoom_to_all()
                 if len(cameras) != 1:
                     render_file = output_path / camera.name / f'{frame_idx}.png'
                 else:
@@ -163,12 +167,6 @@ class Scene:
         cameras = self.cameras(blender_scene)
         if len(cameras) == 0:
             raise RuntimeError('No cameras set, fallback default camera did not work.')
-
-        # Set zoom for all cameras.
-        for camera in cameras:
-            if 'zoomToAll' in camera.data.name:
-                blender_scene.camera = camera
-                self._zoom_to_all()
 
         # Add shadow plane when all objects are in the scene.
         if self._shadow_plane:

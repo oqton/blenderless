@@ -54,10 +54,11 @@ def gif(file_path, root):
 @main.command()
 @click.argument("config_path", required=True, type=click.Path(exists=True))
 @click.argument("output_path", default=".", required=False, type=str)
-def config(config_path, output_path):
+@click.option('--animation', is_flag=True)
+def config(config_path, output_path, animation):
     """Render scene from config file"""
     output_path = pathlib.Path(output_path)
-    render_paths = Blenderless.render_from_config(pathlib.Path(config_path), output_path)
+    render_paths = Blenderless.render_from_config(pathlib.Path(config_path), output_path, animation=animation)
     metadata = {}
     metadata['render_paths'] = [str(path.absolute()) for path in render_paths]
     with (output_path / 'meta.json').open("w") as f:

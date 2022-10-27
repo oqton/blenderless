@@ -27,13 +27,13 @@ class Blenderless():
         return render_paths[0]
 
     @classmethod
-    def render_from_config(cls, config_path, dest_path=None):
+    def render_from_config(cls, config_path, dest_path=None, animation=False):
         """Render from config file."""
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
 
         scene = Scene.from_config(config_path)
-        render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path)
+        render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path, animation=animation)
         return render_paths
 
     @classmethod
