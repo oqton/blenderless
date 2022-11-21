@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
+from typing import Optional
 
 import bmesh
 import bpy
@@ -26,6 +27,7 @@ class Geometry(BlenderObject):
     meta: dict = field(default_factory=dict)
     labels: np.ndarray = None
     is_shadow_catcher: bool = False
+    thickness: Optional[float] = None
 
     def blender_object(self):
         super().blender_object()
@@ -40,6 +42,11 @@ class Geometry(BlenderObject):
 
         if self.is_shadow_catcher:
             self._blender_object.cycles.is_shadow_catcher = True
+
+        if self.thickness is not None:
+            self._blender_object.modifiers.new('Solidify', 'SOLIDIFY')
+            self._blender_object.modifiers["Solidify"].offset = 0
+            self._blender_object.modifiers["Solidify"].thickness = 5e-4
 
         return self._blender_object
 
@@ -73,17 +80,8 @@ class Mesh(Geometry):
             else:
                 vertices = self.mesh.vertices
             faces = self.mesh.faces
-            num_vertices = len(vertices)
-            num_faces = len(faces)
-            self._object_data.vertices.add(num_vertices)
-            self._object_data.loops.add(num_faces * 3)
-            self._object_data.polygons.add(num_faces)
-            self._object_data.vertices.foreach_set("co", vertices.reshape(-1))
-            self._object_data.polygons.foreach_set("loop_total", np.ones(num_faces) * 3)
-            self._object_data.polygons.foreach_set("loop_start", np.arange(num_faces) * 3)
-            self._object_data.polygons.foreach_set("vertices", faces.reshape(-1))
+            self._object_data.from_pydata(vertices.tolist(), [], faces.tolist())
             self._set_face_material_indices()
-
         return self._object_data
 
 
