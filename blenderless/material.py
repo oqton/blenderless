@@ -70,10 +70,13 @@ class MaterialFromName(Material):
         if self._blender_material is None:
             self._blender_material = bpy.data.materials[self.material_name]
             if self.rgba is not None:
+                self._blender_material = self._blender_material.copy()
                 for node in self._blender_material.node_tree.nodes:
                     if 'ColorRamp' in node.name:
-                        self._blender_material = self._blender_material.copy()
-                        node.color_ramp.elements[0].color = self.rgba
+                        num_elements = len(node.color_ramp.elements)
+                        for n in range(num_elements - 1):
+                            node.color_ramp.elements[n].color = self.rgba
+                        node.color_ramp.elements[n].color = (0, 0, 0, 1)
         return self._blender_material
 
 
