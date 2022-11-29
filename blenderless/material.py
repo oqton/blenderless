@@ -74,7 +74,7 @@ class MaterialFromName(Material):
                 for node in self._blender_material.node_tree.nodes:
                     if 'ColorRamp' in node.name:
                         num_elements = len(node.color_ramp.elements)
-                        for n in range(num_elements - 1):
+                        for n in range(num_elements):
                             node.color_ramp.elements[n].color = self.rgba
                         node.color_ramp.elements[n].color = (0, 0, 0, 1)
         return self._blender_material
