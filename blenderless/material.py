@@ -22,6 +22,19 @@ def load_materials(filepath):
         data_to.materials = data_from.materials
 
 
+def convert_to_linear_colorspace(c):
+    if c < 0:
+        return 0
+    elif c < 0.04045:
+        return c / 12.92
+    else:
+        return ((c + 0.055) / 1.055)**2.4
+
+
+def srgba_to_linearrgba(srgba):
+    return [convert_to_linear_colorspace(c) for c in srgba[:3]] + [srgba[3]]
+
+
 @dataclass
 class Material:
     """Material base class."""
@@ -32,7 +45,7 @@ class Material:
 @dataclass
 class MaterialRGBA(Material):
     """Create diffuse single color material."""
-    rgba: List[float] = (200, 200, 200, 255)  # default color white
+    rgba: List[float] = (0.8, 0.8, 0.8, 1)  # default color white
 
     def blender_material(self):
         if self._blender_material is None:
@@ -75,7 +88,7 @@ class MaterialFromName(Material):
                     if 'ColorRamp' in node.name:
                         num_elements = len(node.color_ramp.elements)
                         for n in range(num_elements):
-                            node.color_ramp.elements[n].color = self.rgba
+                            node.color_ramp.elements[n].color = srgba_to_linearrgba(self.rgba)
                         node.color_ramp.elements[n].color = (0, 0, 0, 1)
         return self._blender_material
 
