@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
+from typing import Optional
 
 import bmesh
 import bpy
@@ -26,6 +27,7 @@ class Geometry(BlenderObject):
     meta: dict = field(default_factory=dict)
     labels: np.ndarray = None
     is_shadow_catcher: bool = False
+    thickness: Optional[float] = None
 
     def blender_object(self):
         super().blender_object()
@@ -40,6 +42,11 @@ class Geometry(BlenderObject):
 
         if self.is_shadow_catcher:
             self._blender_object.cycles.is_shadow_catcher = True
+
+        if self.thickness is not None:
+            self._blender_object.modifiers.new('Solidify', 'SOLIDIFY')
+            self._blender_object.modifiers["Solidify"].offset = 0
+            self._blender_object.modifiers["Solidify"].thickness = 5e-4
 
         return self._blender_object
 
@@ -69,10 +76,12 @@ class Mesh(Geometry):
             self._object_data = bpy.data.meshes.new(name=self.name)
             self.load()
             if np.array_equal(np.identity(4), self.transformation):
-                verts = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
-            self._object_data.from_pydata(verts.tolist(), [], self.mesh.faces.tolist())
+                vertices = trimesh.transformations.transform_points(self.mesh.vertices, self.transformation)
+            else:
+                vertices = self.mesh.vertices
+            faces = self.mesh.faces
+            self._object_data.from_pydata(vertices.tolist(), [], faces.tolist())
             self._set_face_material_indices()
-
         return self._object_data
 
 
