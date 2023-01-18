@@ -51,7 +51,7 @@ RUN mkdir build \
     && ninja -j12
 
 RUN cd build && ninja install
-
+RUN rm "install/bpy/3.4/datafiles/fonts/Noto Sans CJK Regular.woff2"
 RUN tar --zstd -cf bpy-$BLENDER_VERSION-headless-python$PYTHON_VERSION-x86_64-linux-gnu.tar.zst install/
 
 RUN cd install && python$PYTHON_VERSION -c "import bpy"
