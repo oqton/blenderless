@@ -70,33 +70,23 @@ class Scene:
         with tempfile.TemporaryDirectory() as tmpdirname:
             render_path = pathlib.Path(tmpdirname) / 'out.png'
             render_filepaths = self.render(render_path, **kwargs)
-            images = []
-            for filename in render_filepaths:
-                images.append(imageio.imread(filename))
+            images = [imageio.imread(filename) for filename in render_filepaths]
         imageio.mimsave(filepath, images, format='GIF', duration=duration / len(images))
         return filepath
 
-    def render(self, filepath, export_blend_path=None):
-        filepath = pathlib.Path(filepath)
-
-        bpy.ops.wm.read_factory_settings(use_empty=True)
-        if self._preset_path is not None and self._preset_scene is not None:
-            bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
-
+    def _load_scene(self) -> bpy.types.Scene:
+        if self._preset_scene is not None:
             scene = [scene for scene in bpy.data.scenes if scene.name == self._preset_scene]
-            if len(scene) == 0:
+            if not scene:
                 raise ValueError(f'scene: {self._preset_scene} not found in preset file: {self._preset_path}')
             bpy.context.window.scene = scene[0]
             self.delete_all_objects()
-
         else:
             bpy.ops.scene.new(type='EMPTY')
-        blender_scene = bpy.context.scene
 
-        if self._preset_path is not None:
-            load_materials(self._root_dir / self._preset_path)
+        return bpy.context.scene
 
-        # Preload meshes.
+    def _preload_meshes(self):
         for obj in self._objects:
             obj.root_dir = self._root_dir
         blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
@@ -110,22 +100,23 @@ class Scene:
         for mesh, blender_mesh in zip(meshes, blender_meshes):
             blender_mesh.mesh = mesh
 
-        # Add objects to blender.
-        for obj in self._objects:
+    def _add_objects(self, blender_scene: bpy.types.Scene):
+        for obj in self._objects:  # Add objects to blender.
             blender_scene.collection.children.link(obj.blender_collection())
 
-        # Set rendering properties.
-        if self._num_samples is not None:
-            bpy.context.scene.cycles.samples = self._num_samples
+    def _set_rendering_props(self, blender_scene: bpy.types.Scene):
         blender_scene.render.resolution_x = self._resolution[0]
         blender_scene.render.resolution_y = self._resolution[1]
         blender_scene.render.engine = self._render_engine
         blender_scene.render.film_transparent = self._transparant
         blender_scene.render.image_settings.color_mode = self._color_mode
+        if self._num_samples is not None:
+            bpy.context.scene.cycles.samples = self._num_samples
         if self._num_threads > 0:
             blender_scene.render.threads = self._num_threads
             blender_scene.render.threads_mode = 'FIXED'
 
+    def _set_cameras(self, blender_scene: bpy.types.Scene):
         # Add default camera when no camera present.
         if len(self.cameras(blender_scene)) == 0:
             camera = BlenderCamera()
@@ -143,10 +134,10 @@ class Scene:
                 blender_scene.camera = camera
                 self._zoom_to_all()
 
-        # Add shadow plane when all objects are in the scene.
-        if self._shadow_plane:
-            self.add_shadow_plane(blender_scene)
+        return cameras
 
+    def _render_scene(self, filepath: pathlib.Path, blender_scene: bpy.types.Scene,
+                      cameras: list[bpy.types.Camera]) -> list[pathlib.Path]:
         render_files = []
         for n, camera in enumerate(cameras):
             if len(cameras) != 1:
@@ -161,6 +152,32 @@ class Scene:
                 raise RuntimeError(
                     f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')
             render_files.append(pathlib.Path(bpy.context.scene.render.filepath))
+
+        return render_files
+
+    def render(self, filepath, export_blend_path=None):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+
+        if self._preset_path is not None:
+            bpy.ops.wm.open_mainfile(filepath=str((self._root_dir / self._preset_path).absolute()))
+
+        blender_scene = self._load_scene()
+
+        if self._preset_path is not None:
+            load_materials(self._root_dir / self._preset_path)
+
+        self._preload_meshes()
+
+        self._add_objects(blender_scene)
+
+        self._set_rendering_props(blender_scene)
+
+        cameras = self._set_cameras(blender_scene)
+
+        if self._shadow_plane:  # Add shadow plane when all objects are in the scene.
+            self.add_shadow_plane(blender_scene)
+
+        render_files = self._render_scene(pathlib.Path(filepath), blender_scene, cameras)
 
         if export_blend_path:
             self.export_blend_file(export_blend_path)
@@ -188,7 +205,7 @@ class Scene:
         """Zoom to view all objects."""
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
-            if obj.type == 'MESH' or obj.type == 'FONT':
+            if obj.type in ['MESH', 'FONT']:
                 obj.select_set(True)
         bpy.ops.view3d.camera_to_view_selected()
 
