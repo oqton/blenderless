@@ -33,4 +33,4 @@ def test_load_scene_from_config(example_path, test_outputs_dir):
     base_render = np.asarray(Image.open(test_output_filepath))
     test_render = np.asarray(Image.open(reference_filepath))
 
-    assert structural_similarity(base_render, test_render, multichannel=True) > 0.995
+    assert structural_similarity(base_render, test_render, channel_axis=2) > 0.995
