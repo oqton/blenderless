@@ -3,7 +3,7 @@
 set -e
 set -x
 
-PYTHON_INTERPRETER="python3.8"
+PYTHON_INTERPRETER="python3.10"
 
 cd "$(bazel info workspace)"
 if [[ -f requirements_lock.txt ]]; then

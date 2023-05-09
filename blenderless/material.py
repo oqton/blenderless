@@ -18,8 +18,13 @@ def load_materials(filepath):
 
     Use the MaterialFromName class to load materials from this file.
     """
+
+    existing_material_names = [m.name for m in bpy.data.materials]
+
     with bpy.data.libraries.load(str(filepath.absolute())) as (data_from, data_to):
-        data_to.materials = data_from.materials
+        # Loading the same material twice causes a seg fault in blender.
+        for name in filter(lambda n: n not in existing_material_names, data_from.materials):
+            data_to.materials.append(name)
 
 
 def convert_to_linear_colorspace(c):
