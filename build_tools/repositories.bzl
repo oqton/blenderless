@@ -7,7 +7,7 @@ def blenderless_repositories():
     http_archive(
         name = "bpy",
         build_file = "@blenderless//build_tools:bpy.BUILD.bazel",
-        sha256 = "90dd048a90bcdc5a026ba9856a96722c0378de0e34fbd97ef1043658369820fe",
+        sha256 = "a21124c640bc65b0cff0b17e8d23ad7b7e943a77df802a5f3d643ebf2ab7bc05",
         strip_prefix = "install",
-        url = "https://github.com/oqton/blenderless/releases/download/bpy-3.4.1-python3.10/bpy-3.4.1-headless-python3.10-x86_64-linux-gnu.tar.zst",
+        url = "https://github.com/oqton/blenderless/releases/download/bpy-3.3.6-python3.10/bpy-3.3.6-headless-python3.10-x86_64-linux-gnu.tar.zst",
     )
