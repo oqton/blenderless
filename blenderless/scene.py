@@ -201,13 +201,24 @@ class Scene:
         return [obj for obj in blender_scene.objects if obj.type == 'CAMERA']
 
     @staticmethod
-    def _zoom_to_all():
+    def _zoom_to_all(max_iter=10, delta_min=5e-3):
         """Zoom to view all objects."""
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
             if obj.type in ['MESH', 'FONT']:
                 obj.select_set(True)
-        bpy.ops.view3d.camera_to_view_selected()
+
+        cam = bpy.context.scene.camera
+        prev_ortho_scale = cam.data.ortho_scale
+
+        # Work-around for camera_to_view_selected() not including entire scene in frame.
+        for _ in range(max_iter):
+            bpy.ops.view3d.camera_to_view_selected()
+            ortho_scale = cam.data.ortho_scale
+            delta = abs(ortho_scale - prev_ortho_scale) / prev_ortho_scale
+            if delta < delta_min:  # Stop early if the ortho scale doesn't change.
+                break
+            prev_ortho_scale = ortho_scale
 
     @staticmethod
     def export_blend_file(filepath):
