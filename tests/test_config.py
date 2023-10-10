@@ -14,7 +14,7 @@ def examples():
 
 
 @pytest.mark.parametrize("example_path", examples())
-def test_load_scene_from_config(example_path, test_outputs_dir):
+def test_config_render_with_reference(example_path, test_outputs_dir):
     outputs_dir = test_outputs_dir / os.path.basename(example_path)
     os.makedirs(outputs_dir)
 
