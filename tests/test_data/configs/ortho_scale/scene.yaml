@@ -1,0 +1,29 @@
+scene:
+  preset_path: ../../preset.blend
+  num_threads: 8
+  resolution:
+  - 848
+  - 476
+
+cameras:
+  - _target_: blenderless.camera.SphericalCoordinateCamera
+    azimuth: -135
+    elevation: 45
+    theta: 0
+    distance: 1
+    zoom_to_all: true
+
+objects:
+  - _target_: blenderless.light.SphericalCoordinateLight
+    type: SUN
+    energy: 2
+    azimuth: 45
+    elevation: 30
+    theta: 0
+    distance: 2
+
+  - _target_: blenderless.geometry.Mesh
+    mesh_path: ../../mesh/cube_ten.stl
+    material:
+      _target_: blenderless.material.MaterialFromName
+      material_name: test_material
