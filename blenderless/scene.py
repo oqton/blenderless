@@ -1,4 +1,4 @@
-import multiprocessing
+import concurrent.futures
 import pathlib
 import tempfile
 
@@ -91,9 +91,9 @@ class Scene:
             obj.root_dir = self._root_dir
         blender_meshes = [obj for obj in self._objects if isinstance(obj, Mesh)]
 
-        if self._num_threads > 1:
-            with multiprocessing.Pool(self._num_threads) as p:
-                meshes = p.map(preload_mesh, blender_meshes)
+        if self._num_threads > 1 and len(blender_meshes) > 3:
+            with concurrent.futures.ThreadPoolExecutor(self._num_threads) as executor:
+                meshes = executor.map(preload_mesh, blender_meshes)
         else:
             meshes = [preload_mesh(m) for m in blender_meshes]
 
