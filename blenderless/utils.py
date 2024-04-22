@@ -1,5 +1,8 @@
+import contextlib
 import logging
 import math
+import os
+import sys
 
 logger = logging.getLogger()
 
@@ -84,3 +87,28 @@ def spherical_to_cartesian(dist, azimuth_deg, elevation_deg):
     y = (dist * math.sin(theta) * math.cos(phi))
     z = (dist * math.sin(phi))
     return (x, y, z)
+
+
+@contextlib.contextmanager
+def stdout_redirected(to=os.devnull, stdout=None):
+    # Credit to https://stackoverflow.com/a/22434262.
+    if stdout is None:
+        stdout = sys.stdout
+
+    stdout_fd = stdout.fileno()
+    # copy stdout_fd before it is overwritten
+    # NOTE: `copied` is inheritable on Windows when duplicating a standard stream
+    with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
+        stdout.flush()  # flush library buffers that dup2 knows nothing about
+        try:
+            os.dup2(to.fileno(), stdout_fd)  # $ exec >&to
+        except ValueError:  # filename
+            with open(to, 'wb') as to_file:
+                os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
+        try:
+            yield stdout  # allow code to be run with the redirected stdout
+        finally:
+            # restore stdout to its previous value
+            # NOTE: dup2 makes stdout_fd inheritable unconditionally
+            stdout.flush()
+            os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
