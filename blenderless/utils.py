@@ -1,4 +1,5 @@
 import contextlib
+import io
 import logging
 import math
 import os
@@ -95,13 +96,27 @@ def stdout_redirected(to=os.devnull, stdout=None):
     if stdout is None:
         stdout = sys.stdout
 
-    stdout_fd = stdout.fileno()
+    def fileno(file_or_fd):
+        fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
+        if not isinstance(fd, int):
+            raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
+        return fd
+
+    try:
+        stdout_fd = fileno(stdout)
+    except io.UnsupportedOperation:
+        # If stdout was already redirected to a location without a file
+        # descriptor, revert to the default fd for stdout.  In this case at
+        # least the stdout of blender will be redirected, while python stdout
+        # is not.
+        stdout_fd = 1
+
     # copy stdout_fd before it is overwritten
     # NOTE: `copied` is inheritable on Windows when duplicating a standard stream
     with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
         stdout.flush()  # flush library buffers that dup2 knows nothing about
         try:
-            os.dup2(to.fileno(), stdout_fd)  # $ exec >&to
+            os.dup2(fileno(to), stdout_fd)  # $ exec >&to
         except ValueError:  # filename
             with open(to, 'wb') as to_file:
                 os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
