@@ -160,15 +160,19 @@ class Scene:
             blender_scene.camera = camera
 
             with tempfile.TemporaryFile() as fp, utils.stdout_redirected(fp):
+                caught_exception = None
                 try:
                     ret_val = list(bpy.ops.render.render(write_still=True))
-                except Exception:
+                except Exception as exc:
                     ret_val = ['EXCEPTION']
-                    raise
+                    caught_exception = exc
                 finally:
                     fp.seek(0)
                     output = fp.read().decode('utf-8')
-                    self._print_blender_output(output, ret_val)
+
+            self._print_blender_output(output, ret_val)
+            if caught_exception:
+                raise caught_exception
 
             if ret_val[0] != 'FINISHED':
                 raise RuntimeError(
