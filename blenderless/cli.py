@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('--verbose/--no-verbose', '-v', default=False, help="Verbose output")
+@click.option('--verbose/--no-verbose', '-v', default=None, help="Verbose output")
 @click.option('--export-blend-path', '-b', default=None, help="Path to export the generated .blend file to")
-def main(verbose, export_blend_path):
+def main(verbose: bool | None, export_blend_path):
     """Rendering geometries from the cli using blender"""
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format='%(processName)s %(message)s')
@@ -19,6 +19,7 @@ def main(verbose, export_blend_path):
     logging.addLevelName(logging.ERROR, "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
     Blenderless.export_blend_path = export_blend_path
+    Blenderless.verbose = verbose
     if export_blend_path:
         logging.info(f'Generated .blend file will be exported to: {export_blend_path}')
 
