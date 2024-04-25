@@ -269,3 +269,11 @@ class Scene:
         for o in Scene.get_all_objects(deleteListObjects):
             o.select_set(True)
         bpy.ops.object.delete()
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, verbose: bool):
+        self._verbose = verbose

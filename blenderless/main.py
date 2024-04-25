@@ -13,6 +13,7 @@ class Blenderless():
 
     export_blend_path: Optional[str] = None
     """Path to export the generated .blend file to."""
+    verbose: bool | None = None
 
     @classmethod
     def render(cls, mesh_path, dest_path=None, azimuth=45, elevation=30, theta=0, **kwargs):
@@ -20,6 +21,7 @@ class Blenderless():
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
 
+        kwargs['verbose'] = kwargs.get('verbose', cls.verbose)
         scene = Scene(**kwargs)
         scene.add_object(Mesh(mesh_path=mesh_path))
         scene.add_object(SphericalCoordinateCamera(azimuth=azimuth, elevation=elevation, theta=theta))
@@ -33,6 +35,8 @@ class Blenderless():
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.png'
 
         scene = Scene.from_config(config_path)
+        if scene.verbose is None:  # Verbose is not present in scene's yaml config.
+            scene.verbose = cls.verbose
         render_paths = scene.render(dest_path, export_blend_path=cls.export_blend_path)
         return render_paths[0]
 
@@ -46,6 +50,7 @@ class Blenderless():
         if dest_path is None:
             dest_path = pathlib.PosixPath(tempfile.gettempdir()) / f'{uuid.uuid4().int}.gif'
 
+        kwargs['verbose'] = kwargs.get('verbose', cls.verbose)
         scene = Scene(**kwargs)
         scene.add_object(Mesh(mesh_path=mesh_path))
         for angle in range(0, 360, int(360 / frames)):
