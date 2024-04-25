@@ -1,4 +1,5 @@
 import concurrent.futures
+import logging
 import multiprocessing
 import pathlib
 import tempfile
@@ -8,6 +9,7 @@ import hydra
 import imageio.v2 as imageio
 from omegaconf import OmegaConf
 
+from blenderless import utils
 from blenderless.blender_object import BlenderObject
 from blenderless.camera import BlenderCamera
 from blenderless.geometry import HorizontalPlane
@@ -32,7 +34,8 @@ class Scene:
                  color_mode='RGBA',
                  resolution=(512, 512),
                  shadow_plane=False,
-                 num_threads=0):
+                 num_threads=0,
+                 verbose: bool | None = None):
 
         self._objects = []
         self._root_dir = root_dir
@@ -47,6 +50,7 @@ class Scene:
         self._shadow_plane = shadow_plane
         self._resolution = resolution
         self._num_threads = num_threads
+        self._verbose = verbose
 
     @classmethod
     def from_config(cls, config_path, root_dir=None):
@@ -139,6 +143,11 @@ class Scene:
 
         return cameras
 
+    def _print_blender_output(self, output: str, ret_val: list[str]):
+        if ((self._verbose is None and logging.root.level == logging.DEBUG) or self._verbose is True or
+                ret_val[0] != 'FINISHED'):
+            print(output)
+
     def _render_scene(self, filepath: pathlib.Path, blender_scene: bpy.types.Scene,
                       cameras: list[bpy.types.Camera]) -> list[pathlib.Path]:
         render_files = []
@@ -150,7 +159,17 @@ class Scene:
             blender_scene.render.filepath = str(render_file)
             blender_scene.camera = camera
 
-            ret_val = list(bpy.ops.render.render(write_still=True))
+            with tempfile.TemporaryFile() as fp, utils.stdout_redirected(fp):
+                try:
+                    ret_val = list(bpy.ops.render.render(write_still=True))
+                except Exception:
+                    ret_val = ['EXCEPTION']
+                    raise
+                finally:
+                    fp.seek(0)
+                    output = fp.read().decode('utf-8')
+                    self._print_blender_output(output, ret_val)
+
             if ret_val[0] != 'FINISHED':
                 raise RuntimeError(
                     f'Expected blenderpy render return value to be "FINISHED" not {ret_val[0]} for camera {n}')

@@ -1,5 +1,9 @@
+import contextlib
+import io
 import logging
 import math
+import os
+import sys
 
 logger = logging.getLogger()
 
@@ -84,3 +88,42 @@ def spherical_to_cartesian(dist, azimuth_deg, elevation_deg):
     y = (dist * math.sin(theta) * math.cos(phi))
     z = (dist * math.sin(phi))
     return (x, y, z)
+
+
+@contextlib.contextmanager
+def stdout_redirected(to=os.devnull, stdout=None):
+    # Credit to https://stackoverflow.com/a/22434262.
+    if stdout is None:
+        stdout = sys.stdout
+
+    def fileno(file_or_fd):
+        fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
+        if not isinstance(fd, int):
+            raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
+        return fd
+
+    try:
+        stdout_fd = fileno(stdout)
+    except io.UnsupportedOperation:
+        # If stdout was already redirected to a location without a file
+        # descriptor, revert to the default fd for stdout.  In this case at
+        # least the stdout of blender will be redirected, while python stdout
+        # is not.
+        stdout_fd = 1
+
+    # copy stdout_fd before it is overwritten
+    # NOTE: `copied` is inheritable on Windows when duplicating a standard stream
+    with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
+        stdout.flush()  # flush library buffers that dup2 knows nothing about
+        try:
+            os.dup2(fileno(to), stdout_fd)  # $ exec >&to
+        except ValueError:  # filename
+            with open(to, 'wb') as to_file:
+                os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
+        try:
+            yield stdout  # allow code to be run with the redirected stdout
+        finally:
+            # restore stdout to its previous value
+            # NOTE: dup2 makes stdout_fd inheritable unconditionally
+            stdout.flush()
+            os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
